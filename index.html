@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modu - Modern Business Solutions</title>
+    <meta name="description" content="Modu provides innovative business solutions to help your company grow and succeed in the digital age.">
+    <link href="./assets/css/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="font-sans text-gray-900 leading-normal tracking-normal">
+    <!-- Header -->
+    <header class="bg-white shadow-sm fixed w-full top-0 z-50">
+        <nav class="container-custom">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-primary-600">
+                        <i class="fas fa-cube mr-2"></i>Modu
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#home" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition duration-300">Home</a>
+                        <a href="#services" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition duration-300">Services</a>
+                        <a href="#about" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition duration-300">About</a>
+                        <a href="#testimonials" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition duration-300">Testimonials</a>
+                        <a href="#contact" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition duration-300">Contact</a>
+                    </div>
+                </div>
+                
+                <!-- CTA Button -->
+                <div class="hidden md:block">
+                    <a href="#contact" class="btn-primary">Get Started</a>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" class="text-gray-700 hover:text-primary-600 focus:outline-none focus:text-primary-600" id="mobile-menu-button">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <div class="md:hidden hidden" id="mobile-menu">
+                <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t">
+                    <a href="#home" class="block text-gray-700 hover:text-primary-600 px-3 py-2 text-base font-medium">Home</a>
+                    <a href="#services" class="block text-gray-700 hover:text-primary-600 px-3 py-2 text-base font-medium">Services</a>
+                    <a href="#about" class="block text-gray-700 hover:text-primary-600 px-3 py-2 text-base font-medium">About</a>
+                    <a href="#testimonials" class="block text-gray-700 hover:text-primary-600 px-3 py-2 text-base font-medium">Testimonials</a>
+                    <a href="#contact" class="block text-gray-700 hover:text-primary-600 px-3 py-2 text-base font-medium">Contact</a>
+                    <a href="#contact" class="block btn-primary mt-4">Get Started</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="pt-16 gradient-bg text-white">
+        <div class="section-padding">
+            <div class="container-custom">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="text-center lg:text-left">
+                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance">
+                            Transform Your Business with <span class="text-accent-500">Modern Solutions</span>
+                        </h1>
+                        <p class="text-xl mb-8 text-gray-100 leading-relaxed">
+                            We help businesses leverage cutting-edge technology to streamline operations, increase efficiency, and drive growth in today's digital landscape.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                            <a href="#contact" class="btn-primary bg-accent-500 hover:bg-accent-600">
+                                Start Your Journey
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                            <a href="#services" class="btn-secondary text-white border-white hover:bg-white hover:text-primary-600">
+                                Learn More
+                            </a>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8">
+                            <i class="fas fa-rocket text-6xl text-accent-500 mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-4">Ready to Launch?</h3>
+                            <p class="text-gray-100">Join hundreds of companies that trust Modu for their digital transformation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="bg-gray-50">
+        <div class="section-padding">
+            <div class="container-custom">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Services</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        We offer comprehensive solutions tailored to your business needs
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Service 1 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="text-primary-600 text-4xl mb-4">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Web Development</h3>
+                            <p class="text-gray-600 mb-6">
+                                Custom web applications built with modern technologies for optimal performance and user experience.
+                            </p>
+                            <ul class="text-sm text-gray-500 space-y-2">
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Responsive Design</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Modern Frameworks</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>SEO Optimized</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Service 2 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="text-primary-600 text-4xl mb-4">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Mobile Solutions</h3>
+                            <p class="text-gray-600 mb-6">
+                                Native and cross-platform mobile applications that engage users and drive business growth.
+                            </p>
+                            <ul class="text-sm text-gray-500 space-y-2">
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>iOS & Android</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Cross-platform</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>App Store Deployment</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Service 3 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="text-primary-600 text-4xl mb-4">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Cloud Services</h3>
+                            <p class="text-gray-600 mb-6">
+                                Scalable cloud infrastructure and migration services to ensure your business runs smoothly.
+                            </p>
+                            <ul class="text-sm text-gray-500 space-y-2">
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>AWS/Azure/GCP</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Migration Support</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>24/7 Monitoring</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Service 4 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="text-primary-600 text-4xl mb-4">
+                                <i class="fas fa-chart-analytics"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Data Analytics</h3>
+                            <p class="text-gray-600 mb-6">
+                                Transform your data into actionable insights with our advanced analytics solutions.
+                            </p>
+                            <ul class="text-sm text-gray-500 space-y-2">
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Real-time Dashboards</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Predictive Analytics</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Custom Reports</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Service 5 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="text-primary-600 text-4xl mb-4">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Cybersecurity</h3>
+                            <p class="text-gray-600 mb-6">
+                                Protect your business with comprehensive security solutions and threat monitoring.
+                            </p>
+                            <ul class="text-sm text-gray-500 space-y-2">
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Security Audits</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Threat Detection</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Compliance Support</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Service 6 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="text-primary-600 text-4xl mb-4">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Consulting</h3>
+                            <p class="text-gray-600 mb-6">
+                                Strategic technology consulting to help you make informed decisions for your business.
+                            </p>
+                            <ul class="text-sm text-gray-500 space-y-2">
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Technology Strategy</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Digital Transformation</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i>Process Optimization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="bg-white">
+        <div class="section-padding">
+            <div class="container-custom">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">About Modu</h2>
+                        <p class="text-lg text-gray-600 mb-6">
+                            With over a decade of experience in the technology industry, Modu has been at the forefront of digital innovation, helping businesses transform and thrive in an increasingly digital world.
+                        </p>
+                        <p class="text-lg text-gray-600 mb-8">
+                            Our team of expert developers, designers, and consultants work collaboratively to deliver solutions that not only meet your current needs but also scale with your future growth.
+                        </p>
+                        
+                        <div class="grid grid-cols-2 gap-6 mb-8">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-primary-600 mb-2">500+</div>
+                                <div class="text-gray-600">Projects Completed</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-primary-600 mb-2">50+</div>
+                                <div class="text-gray-600">Happy Clients</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-primary-600 mb-2">10+</div>
+                                <div class="text-gray-600">Years Experience</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-primary-600 mb-2">24/7</div>
+                                <div class="text-gray-600">Support</div>
+                            </div>
+                        </div>
+                        
+                        <a href="#contact" class="btn-primary">Learn More About Us</a>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl p-8 text-white">
+                            <i class="fas fa-lightbulb text-6xl mb-6"></i>
+                            <h3 class="text-2xl font-semibold mb-4">Innovation First</h3>
+                            <p class="text-lg">
+                                We believe in pushing boundaries and exploring new technologies to provide our clients with cutting-edge solutions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="bg-gray-50">
+        <div class="section-padding">
+            <div class="container-custom">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">What Our Clients Say</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Don't just take our word for it - hear from some of our satisfied clients
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Testimonial 1 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="flex items-center mb-4">
+                                <div class="flex text-accent-500">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-6 italic">
+                                "Modu transformed our outdated systems into a modern, efficient platform. The results exceeded our expectations and our productivity has increased by 40%."
+                            </p>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">Sarah Johnson</div>
+                                    <div class="text-sm text-gray-500">CEO, TechCorp</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Testimonial 2 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="flex items-center mb-4">
+                                <div class="flex text-accent-500">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-6 italic">
+                                "The team at Modu is incredible. They understood our vision and delivered a solution that perfectly fits our business needs. Highly recommended!"
+                            </p>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">Michael Chen</div>
+                                    <div class="text-sm text-gray-500">CTO, StartupX</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Testimonial 3 -->
+                    <div class="card">
+                        <div class="p-8">
+                            <div class="flex items-center mb-4">
+                                <div class="flex text-accent-500">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-6 italic">
+                                "Working with Modu was a game-changer for our company. Their expertise in cloud migration saved us both time and money while improving our performance."
+                            </p>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">Emily Rodriguez</div>
+                                    <div class="text-sm text-gray-500">Operations Manager, GlobalTech</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="bg-white">
+        <div class="section-padding">
+            <div class="container-custom">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Get In Touch</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Ready to transform your business? Let's discuss how we can help you achieve your goals.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- Contact Information -->
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-6">Contact Information</h3>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-10 w-10 rounded-md bg-primary-500 text-white">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-gray-900">Address</h4>
+                                    <p class="text-gray-600">123 Business Ave, Suite 100<br>Tech City, TC 12345</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-10 w-10 rounded-md bg-primary-500 text-white">
+                                        <i class="fas fa-phone"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-gray-900">Phone</h4>
+                                    <p class="text-gray-600">+1 (555) 123-4567</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-10 w-10 rounded-md bg-primary-500 text-white">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-gray-900">Email</h4>
+                                    <p class="text-gray-600">hello@modu.com</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-10 w-10 rounded-md bg-primary-500 text-white">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-gray-900">Business Hours</h4>
+                                    <p class="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 2:00 PM</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Media Links -->
+                        <div class="mt-8">
+                            <h4 class="text-lg font-medium text-gray-900 mb-4">Follow Us</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-gray-400 hover:text-primary-600 transition duration-300">
+                                    <i class="fab fa-linkedin text-2xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-400 hover:text-primary-600 transition duration-300">
+                                    <i class="fab fa-twitter text-2xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-400 hover:text-primary-600 transition duration-300">
+                                    <i class="fab fa-facebook text-2xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-400 hover:text-primary-600 transition duration-300">
+                                    <i class="fab fa-instagram text-2xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Form -->
+                    <div>
+                        <form id="contactForm" class="space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="firstName" class="form-label">First Name *</label>
+                                    <input type="text" id="firstName" name="firstName" required class="form-input">
+                                </div>
+                                <div>
+                                    <label for="lastName" class="form-label">Last Name *</label>
+                                    <input type="text" id="lastName" name="lastName" required class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" id="email" name="email" required class="form-input">
+                            </div>
+                            
+                            <div>
+                                <label for="company" class="form-label">Company</label>
+                                <input type="text" id="company" name="company" class="form-input">
+                            </div>
+                            
+                            <div>
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" class="form-input">
+                            </div>
+                            
+                            <div>
+                                <label for="service" class="form-label">Service Interest</label>
+                                <select id="service" name="service" class="form-input">
+                                    <option value="">Select a service</option>
+                                    <option value="web-development">Web Development</option>
+                                    <option value="mobile-solutions">Mobile Solutions</option>
+                                    <option value="cloud-services">Cloud Services</option>
+                                    <option value="data-analytics">Data Analytics</option>
+                                    <option value="cybersecurity">Cybersecurity</option>
+                                    <option value="consulting">Consulting</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="message" class="form-label">Message *</label>
+                                <textarea id="message" name="message" rows="4" required class="form-input" placeholder="Tell us about your project or requirements..."></textarea>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" id="privacy" name="privacy" required class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                                <label for="privacy" class="ml-2 block text-sm text-gray-700">
+                                    I agree to the <a href="#" class="text-primary-600 hover:underline">Privacy Policy</a> and <a href="#" class="text-primary-600 hover:underline">Terms of Service</a> *
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <button type="submit" class="w-full btn-primary" id="submitBtn">
+                                    <span id="submitText">Send Message</span>
+                                    <i class="fas fa-paper-plane ml-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Success/Error Messages -->
+                        <div id="formMessage" class="mt-4 hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="section-padding">
+            <div class="container-custom">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Company Info -->
+                    <div>
+                        <div class="text-2xl font-bold mb-4">
+                            <i class="fas fa-cube mr-2"></i>Modu
+                        </div>
+                        <p class="text-gray-300 mb-4">
+                            Transforming businesses with innovative technology solutions since 2013.
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Services -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Services</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li><a href="#" class="hover:text-white transition duration-300">Web Development</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Mobile Solutions</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Cloud Services</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Data Analytics</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Cybersecurity</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Consulting</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Company -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Company</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li><a href="#about" class="hover:text-white transition duration-300">About Us</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Careers</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Blog</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Case Studies</a></li>
+                            <li><a href="#contact" class="hover:text-white transition duration-300">Contact</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Legal -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Legal</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li><a href="#" class="hover:text-white transition duration-300">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Terms of Service</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Cookie Policy</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">GDPR</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <hr class="border-gray-700 my-8">
+                
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-300 text-sm">
+                        &copy; 2024 Modu. All rights reserved.
+                    </p>
+                    <p class="text-gray-300 text-sm mt-2 md:mt-0">
+                        Made with <i class="fas fa-heart text-red-500"></i> for innovation
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="./assets/js/main.js"></script>
+</body>
+</html>

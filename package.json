@@ -1,0 +1,23 @@
+{
+  "name": "modu-web-page",
+  "version": "1.0.0",
+  "description": "Static commercial webpage with Tailwind CSS",
+  "main": "index.html",
+  "scripts": {
+    "build-css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch",
+    "build": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --minify",
+    "dev": "live-server --port=3000"
+  },
+  "keywords": [
+    "tailwind",
+    "static-site",
+    "commercial",
+    "responsive"
+  ],
+  "author": "Modu",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "live-server": "^1.2.2"
+  }
+}

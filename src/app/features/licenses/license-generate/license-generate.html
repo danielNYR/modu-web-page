@@ -1,0 +1,154 @@
+<a routerLink="/licencias" class="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+  <ng-icon name="lucideArrowLeft" size="16" />
+  Volver a licencias
+</a>
+
+<h1 class="text-2xl font-semibold tracking-tight text-foreground">Generar o renovar licencia</h1>
+<p class="mt-1 text-sm text-muted-foreground">
+  Si ya existe una licencia vigente para el mismo tenant y producto, se actualiza en lugar de crear una nueva.
+</p>
+
+@if (licenciaCreadaId()) {
+  <div hlmCard class="mt-6 max-w-xl">
+    <div hlmCardContent class="space-y-4">
+      <p class="text-sm font-medium text-foreground">
+        Licencia #{{ licenciaCreadaId() }} generada correctamente.
+      </p>
+
+      @if (claveOffline()) {
+        <div class="rounded-lg border border-moldhea-300 bg-moldhea-50 p-4">
+          <p class="text-sm font-medium text-moldhea-800">
+            Clave de licencia offline — cópiala ahora, no se podrá volver a mostrar.
+          </p>
+          <code class="mt-2 block break-all rounded-md bg-white px-3 py-2 text-sm text-moldhea-900">{{
+            claveOffline()
+          }}</code>
+        </div>
+      }
+
+      <button hlmBtn (click)="goToLicencia()">Ver licencia</button>
+    </div>
+  </div>
+} @else {
+  <div hlmCard class="mt-6 max-w-xl">
+    <div hlmCardContent class="space-y-5">
+      @if (submitError()) {
+        <p class="text-sm text-destructive">{{ submitError() }}</p>
+      }
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+          <label hlmLabel for="idTenant">ID de tenant *</label>
+          <input
+            hlmInput
+            id="idTenant"
+            type="number"
+            class="w-full"
+            [ngModel]="idTenant()"
+            (ngModelChange)="idTenant.set($event ? +$event : undefined)"
+          />
+        </div>
+        <div class="space-y-1.5">
+          <label hlmLabel for="idUsuario">ID de usuario *</label>
+          <input
+            hlmInput
+            id="idUsuario"
+            type="number"
+            class="w-full"
+            [ngModel]="idUsuario()"
+            (ngModelChange)="idUsuario.set($event ? +$event : undefined)"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label hlmLabel for="idProducto">Producto *</label>
+        <select
+          id="idProducto"
+          class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          [ngModel]="idProducto()"
+          (ngModelChange)="onProductoChange($event)"
+        >
+          <option [ngValue]="undefined">Selecciona un producto…</option>
+          @for (producto of productosResource.value(); track producto.id) {
+            <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="space-y-1.5">
+        <label hlmLabel for="idPlan">Plan *</label>
+        <select
+          id="idPlan"
+          class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+          [ngModel]="idPlan()"
+          (ngModelChange)="onPlanChange($event)"
+          [disabled]="!idProducto()"
+        >
+          <option [ngValue]="undefined">Selecciona un plan…</option>
+          @for (plan of planesResource.value(); track plan.id) {
+            <option [ngValue]="plan.id">{{ plan.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+          <label hlmLabel for="periodo">Periodo</label>
+          <select
+            id="periodo"
+            class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            [ngModel]="periodo()"
+            (ngModelChange)="periodo.set($event)"
+          >
+            @for (p of periodos; track p) {
+              <option [value]="p">{{ p }}</option>
+            }
+          </select>
+        </div>
+        <div class="space-y-1.5">
+          <label hlmLabel for="tipoDespliegue">Despliegue</label>
+          <select
+            id="tipoDespliegue"
+            class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            [ngModel]="tipoDespliegue()"
+            (ngModelChange)="tipoDespliegue.set($event)"
+          >
+            @for (t of tiposDespliegue; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (idPlan() && modulosPlanResource.value().length) {
+        <div class="space-y-2">
+          <p class="text-sm font-medium text-foreground">Módulos del plan</p>
+          <p class="text-xs text-muted-foreground">
+            Por defecto se usan los módulos del plan. Desmarca/marca para forzar un override en esta licencia.
+          </p>
+          <div class="space-y-1 rounded-md border border-border p-3">
+            @for (pm of modulosPlanResource.value(); track pm.idModulo) {
+              <label class="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  class="size-4 rounded border-input accent-moldhea-600"
+                  [checked]="isChecked(pm.idModulo, pm.habilitado)"
+                  (change)="toggleModulo(pm.idModulo, pm.habilitado, $any($event.target).checked)"
+                />
+                Módulo #{{ pm.idModulo }}
+                @if (pm.limiteUso !== null) {
+                  <span class="text-xs text-muted-foreground">(límite: {{ pm.limiteUso }} {{ pm.unidadLimite }})</span>
+                }
+              </label>
+            }
+          </div>
+        </div>
+      }
+
+      <button hlmBtn class="w-full" [disabled]="!canSubmit() || submitting()" (click)="submit()">
+        {{ submitting() ? 'Generando…' : 'Generar licencia' }}
+      </button>
+    </div>
+  </div>
+}

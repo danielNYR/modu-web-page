@@ -1,0 +1,168 @@
+<a routerLink="/licencias" class="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+  <ng-icon name="lucideArrowLeft" size="16" />
+  Volver a licencias
+</a>
+
+@if (licenseResource.error()) {
+  <p class="py-8 text-center text-sm text-destructive">No se pudo cargar la licencia.</p>
+} @else if (licenseResource.isLoading()) {
+  <p class="py-8 text-center text-sm text-muted-foreground">Cargando licencia…</p>
+} @else if (licenseResource.value(); as licencia) {
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight text-foreground">{{ licencia.planNombre }}</h1>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Licencia #{{ licencia.idLicencia }} ·
+        <a [routerLink]="['/tenants', licencia.idTenant]" class="text-moldhea-600 hover:underline"
+          >Tenant #{{ licencia.idTenant }}</a
+        >
+      </p>
+    </div>
+    <span hlmBadge [variant]="estatusVariant[licencia.estatus]" class="capitalize">{{
+      licencia.estatus.toLowerCase()
+    }}</span>
+  </div>
+
+  @if (claveOfflineNueva()) {
+    <div class="mb-6 rounded-lg border border-moldhea-300 bg-moldhea-50 p-4">
+      <p class="text-sm font-medium text-moldhea-800">
+        Nueva clave de licencia offline generada — cópiala ahora, no se podrá volver a mostrar.
+      </p>
+      <code class="mt-2 block break-all rounded-md bg-white px-3 py-2 text-sm text-moldhea-900">{{
+        claveOfflineNueva()
+      }}</code>
+    </div>
+  }
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div hlmCard class="lg:col-span-2">
+      <div hlmCardHeader>
+        <h3 hlmCardTitle>Detalle</h3>
+      </div>
+      <div hlmCardContent class="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+        <div>
+          <p class="text-muted-foreground">Usuario</p>
+          <p class="font-medium">#{{ licencia.idUsuario }}</p>
+        </div>
+        <div>
+          <p class="text-muted-foreground">Periodo</p>
+          <p class="font-medium capitalize">{{ licencia.periodo.toLowerCase() }}</p>
+        </div>
+        <div>
+          <p class="text-muted-foreground">Despliegue</p>
+          <p class="font-medium capitalize">{{ licencia.tipoDespliegue.toLowerCase() }}</p>
+        </div>
+        <div>
+          <p class="text-muted-foreground">Inicio</p>
+          <p class="font-medium">{{ licencia.fechaInicio }}</p>
+        </div>
+        <div>
+          <p class="text-muted-foreground">Vence</p>
+          <p class="font-medium">{{ licencia.fechaFin ?? 'Sin vencimiento' }}</p>
+        </div>
+        <div>
+          <p class="text-muted-foreground">Días de gracia offline</p>
+          <p class="font-medium">{{ licencia.diasGraciaOffline }}</p>
+        </div>
+      </div>
+
+      <div hlmCardHeader class="border-t border-border pt-4">
+        <h3 hlmCardTitle>Módulos habilitados</h3>
+      </div>
+      <div hlmCardContent>
+        <div hlmTableContainer>
+          <table hlmTable>
+            <thead hlmTHead>
+              <tr hlmTr>
+                <th hlmTh>Módulo</th>
+                <th hlmTh>Límite de uso</th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (modulo of licencia.modulosHabilitados; track modulo.idModulo) {
+                <tr hlmTr>
+                  <td hlmTd class="font-medium">{{ modulo.nombre }}</td>
+                  <td hlmTd class="text-muted-foreground">
+                    @if (modulo.limiteUso !== null) {
+                      {{ modulo.limiteUso }} {{ modulo.unidadLimite }}
+                    } @else {
+                      Sin límite
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr hlmTr>
+                  <td hlmTd colspan="2" class="py-6 text-center text-muted-foreground">
+                    Sin módulos habilitados.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div hlmCard>
+      <div hlmCardHeader>
+        <h3 hlmCardTitle>Acciones</h3>
+      </div>
+      <div hlmCardContent class="space-y-4">
+        @if (actionError()) {
+          <p class="text-sm text-destructive">{{ actionError() }}</p>
+        }
+
+        @if (!showExtend()) {
+          <button hlmBtn variant="outline" class="w-full" (click)="showExtend.set(true); showRevoke.set(false)">
+            Extender vigencia
+          </button>
+        } @else {
+          <div class="space-y-2 rounded-md border border-border p-3">
+            <label hlmLabel for="nuevaFechaFin">Nueva fecha de fin</label>
+            <input
+              hlmInput
+              id="nuevaFechaFin"
+              type="date"
+              class="w-full"
+              [ngModel]="nuevaFechaFin()"
+              (ngModelChange)="nuevaFechaFin.set($event)"
+            />
+            <div class="flex gap-2">
+              <button hlmBtn size="sm" class="flex-1" [disabled]="actionPending() || !nuevaFechaFin()" (click)="extender()">
+                Confirmar
+              </button>
+              <button hlmBtn variant="ghost" size="sm" (click)="showExtend.set(false)">Cancelar</button>
+            </div>
+          </div>
+        }
+
+        @if (licencia.estatus !== 'CANCELADA') {
+          @if (!showRevoke()) {
+            <button hlmBtn variant="destructive" class="w-full" (click)="showRevoke.set(true); showExtend.set(false)">
+              Revocar licencia
+            </button>
+          } @else {
+            <div class="space-y-2 rounded-md border border-destructive/30 p-3">
+              <label hlmLabel for="razon">Razón (opcional)</label>
+              <input
+                hlmInput
+                id="razon"
+                type="text"
+                class="w-full"
+                placeholder="Motivo de la cancelación"
+                [ngModel]="razon()"
+                (ngModelChange)="razon.set($event)"
+              />
+              <div class="flex gap-2">
+                <button hlmBtn variant="destructive" size="sm" class="flex-1" [disabled]="actionPending()" (click)="revocar()">
+                  Confirmar revocación
+                </button>
+                <button hlmBtn variant="ghost" size="sm" (click)="showRevoke.set(false)">Cancelar</button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}

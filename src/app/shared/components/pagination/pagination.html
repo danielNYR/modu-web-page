@@ -1,0 +1,27 @@
+<div class="flex items-center justify-between border-t border-border px-4 py-3 text-sm text-muted-foreground">
+  <p>
+    Página {{ page() + 1 }} de {{ totalPages() || 1 }}
+    @if (totalElements() !== undefined) {
+      · {{ totalElements() }} resultados
+    }
+  </p>
+
+  <div class="flex items-center gap-2">
+    <button
+      type="button"
+      (click)="previous()"
+      [disabled]="first()"
+      class="flex size-8 items-center justify-center rounded-md border border-input transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+    >
+      <ng-icon name="lucideChevronLeft" size="16" />
+    </button>
+    <button
+      type="button"
+      (click)="next()"
+      [disabled]="last()"
+      class="flex size-8 items-center justify-center rounded-md border border-input transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+    >
+      <ng-icon name="lucideChevronRight" size="16" />
+    </button>
+  </div>
+</div>

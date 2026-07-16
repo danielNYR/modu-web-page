@@ -1,0 +1,174 @@
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+  <select
+    class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+    [ngModel]="filterProducto()"
+    (ngModelChange)="filterProducto.set($event)"
+  >
+    <option [ngValue]="undefined">Todos los productos</option>
+    @for (producto of productosResource.value(); track producto.id) {
+      <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+    }
+  </select>
+
+  <button hlmBtn size="sm" (click)="showForm.set(!showForm())">
+    <ng-icon name="lucidePlus" size="16" />
+    Nuevo plan
+  </button>
+</div>
+
+@if (error()) {
+  <p class="border-b border-border px-4 py-2 text-sm text-destructive">{{ error() }}</p>
+}
+
+@if (showForm()) {
+  <div class="grid grid-cols-2 gap-3 border-b border-border bg-muted/30 p-4 sm:grid-cols-3">
+    <div class="space-y-1.5">
+      <label hlmLabel for="pl-producto">Producto</label>
+      <select
+        id="pl-producto"
+        class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none"
+        [ngModel]="formProducto()"
+        (ngModelChange)="formProducto.set($event)"
+      >
+        <option [ngValue]="undefined">Selecciona…</option>
+        @for (producto of productosResource.value(); track producto.id) {
+          <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+        }
+      </select>
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="pl-slug">Slug</label>
+      <input hlmInput id="pl-slug" [ngModel]="slug()" (ngModelChange)="slug.set($event)" placeholder="pro" />
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="pl-nombre">Nombre</label>
+      <input hlmInput id="pl-nombre" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Plan Pro" />
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="pl-mensual">Precio mensual</label>
+      <input
+        hlmInput
+        id="pl-mensual"
+        type="number"
+        [ngModel]="precioMensual()"
+        (ngModelChange)="precioMensual.set($event ? +$event : undefined)"
+      />
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="pl-anual">Precio anual</label>
+      <input
+        hlmInput
+        id="pl-anual"
+        type="number"
+        [ngModel]="precioAnual()"
+        (ngModelChange)="precioAnual.set($event ? +$event : undefined)"
+      />
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="pl-trial">Días de trial</label>
+      <input
+        hlmInput
+        id="pl-trial"
+        type="number"
+        placeholder="14"
+        [ngModel]="trialDias()"
+        (ngModelChange)="trialDias.set($event ? +$event : undefined)"
+      />
+    </div>
+    <div class="col-span-full flex gap-2">
+      <button hlmBtn size="sm" [disabled]="saving()" (click)="crear()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
+      <button hlmBtn variant="ghost" size="sm" (click)="showForm.set(false)">Cancelar</button>
+    </div>
+  </div>
+}
+
+<div hlmTableContainer>
+  <table hlmTable>
+    <thead hlmTHead>
+      <tr hlmTr>
+        <th hlmTh>Plan</th>
+        <th hlmTh>Producto</th>
+        <th hlmTh>Precio mensual</th>
+        <th hlmTh>Precio anual</th>
+        <th hlmTh>Trial</th>
+        <th hlmTh>Estado</th>
+        <th hlmTh></th>
+      </tr>
+    </thead>
+    <tbody hlmTBody>
+      @for (plan of planesResource.value(); track plan.id) {
+        <tr hlmTr>
+          <td hlmTd class="font-medium">{{ plan.nombre }}</td>
+          <td hlmTd>{{ productoNombre(plan.idProducto) }}</td>
+          <td hlmTd>{{ plan.precioMensual | number: '1.2-2' }} {{ plan.moneda }}</td>
+          <td hlmTd>{{ plan.precioAnual | number: '1.2-2' }} {{ plan.moneda }}</td>
+          <td hlmTd>{{ plan.trialDias }} días</td>
+          <td hlmTd>
+            <span hlmBadge [variant]="plan.isActive ? 'default' : 'outline'">{{
+              plan.isActive ? 'Activo' : 'Inactivo'
+            }}</span>
+          </td>
+          <td hlmTd class="text-right whitespace-nowrap">
+            <button hlmBtn variant="ghost" size="sm" (click)="gestionarModulos(plan.id)">Módulos</button>
+            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(plan.id, !plan.isActive)">
+              {{ plan.isActive ? 'Desactivar' : 'Activar' }}
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr hlmTr>
+          <td hlmTd colspan="7" class="py-8 text-center text-muted-foreground">
+            {{ planesResource.isLoading() ? 'Cargando…' : 'Sin planes registrados.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (managingPlanId()) {
+  <div class="border-t border-border bg-muted/20 p-4">
+    <div class="mb-3 flex items-center justify-between">
+      <p class="text-sm font-medium text-foreground">Módulos del plan #{{ managingPlanId() }}</p>
+      <button hlmBtn variant="ghost" size="sm" (click)="cerrarGestionModulos()">Cerrar</button>
+    </div>
+
+    @if (modulosDelProducto.isLoading() || modulosDelPlan.isLoading()) {
+      <p class="text-sm text-muted-foreground">Cargando módulos…</p>
+    } @else if (!moduleEdits().length) {
+      <p class="text-sm text-muted-foreground">Este producto no tiene módulos en el catálogo todavía.</p>
+    } @else {
+      <div class="space-y-2">
+        @for (m of moduleEdits(); track m.idModulo) {
+          <div class="flex flex-wrap items-center gap-3 rounded-md border border-border bg-background p-2.5">
+            <label class="flex flex-1 items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                class="size-4 rounded border-input accent-moldhea-600"
+                [checked]="m.habilitado"
+                (change)="toggleModuleEdit(m.idModulo, $any($event.target).checked)"
+              />
+              {{ m.nombre }}
+            </label>
+            <input
+              hlmInput
+              type="number"
+              class="w-32"
+              placeholder="Límite de uso"
+              [ngModel]="m.limiteUso"
+              (ngModelChange)="setLimiteUso(m.idModulo, $event ?? '')"
+            />
+          </div>
+        }
+      </div>
+
+      <button hlmBtn size="sm" class="mt-3" [disabled]="moduleSaving()" (click)="guardarModulos()">
+        {{ moduleSaving() ? 'Guardando…' : 'Guardar módulos del plan' }}
+      </button>
+      <p class="mt-2 text-xs text-muted-foreground">
+        Si habilitas un módulo con dependencias "hard", asegúrate de habilitar también su dependencia en este mismo
+        guardado — el backend lo valida y rechaza con 400 si falta.
+      </p>
+    }
+  </div>
+}

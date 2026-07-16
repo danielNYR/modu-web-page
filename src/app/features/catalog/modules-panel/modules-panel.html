@@ -1,0 +1,148 @@
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+  <select
+    class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+    [ngModel]="filterProducto()"
+    (ngModelChange)="filterProducto.set($event)"
+  >
+    <option [ngValue]="undefined">Todos los productos</option>
+    @for (producto of productosResource.value(); track producto.id) {
+      <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+    }
+  </select>
+
+  <button hlmBtn size="sm" [disabled]="!filterProducto()" (click)="showForm.set(!showForm())">
+    <ng-icon name="lucidePlus" size="16" />
+    Nuevo módulo
+  </button>
+</div>
+
+@if (!filterProducto()) {
+  <p class="border-b border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+    Selecciona un producto para poder crear módulos y gestionar sus dependencias.
+  </p>
+}
+
+@if (error()) {
+  <p class="border-b border-border px-4 py-2 text-sm text-destructive">{{ error() }}</p>
+}
+
+@if (showForm()) {
+  <div class="flex flex-wrap items-end gap-3 border-b border-border bg-muted/30 p-4">
+    <div class="space-y-1.5">
+      <label hlmLabel for="m-slug">Slug</label>
+      <input hlmInput id="m-slug" [ngModel]="slug()" (ngModelChange)="slug.set($event)" placeholder="inventario" />
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="m-nombre">Nombre</label>
+      <input hlmInput id="m-nombre" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Inventario" />
+    </div>
+    <label class="flex items-center gap-2 text-sm">
+      <input type="checkbox" class="size-4 rounded border-input accent-moldhea-600" [ngModel]="esCore()" (ngModelChange)="esCore.set($event)" />
+      Es core
+    </label>
+    <button hlmBtn size="sm" [disabled]="saving()" (click)="crear()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
+    <button hlmBtn variant="ghost" size="sm" (click)="showForm.set(false)">Cancelar</button>
+  </div>
+}
+
+<div hlmTableContainer>
+  <table hlmTable>
+    <thead hlmTHead>
+      <tr hlmTr>
+        <th hlmTh>Módulo</th>
+        <th hlmTh>Slug</th>
+        <th hlmTh>Core</th>
+        <th hlmTh>Estado</th>
+        <th hlmTh></th>
+      </tr>
+    </thead>
+    <tbody hlmTBody>
+      @for (modulo of modulosResource.value(); track modulo.id) {
+        <tr hlmTr>
+          <td hlmTd class="font-medium">{{ modulo.nombre }}</td>
+          <td hlmTd class="font-mono text-xs text-muted-foreground">{{ modulo.slug }}</td>
+          <td hlmTd>{{ modulo.esCore ? 'Sí' : 'No' }}</td>
+          <td hlmTd>
+            <span hlmBadge [variant]="modulo.isActive ? 'default' : 'outline'">{{
+              modulo.isActive ? 'Activo' : 'Inactivo'
+            }}</span>
+          </td>
+          <td hlmTd class="text-right whitespace-nowrap">
+            <button hlmBtn variant="ghost" size="sm" (click)="gestionarDependencias(modulo.id)">Dependencias</button>
+            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(modulo.id, !modulo.isActive)">
+              {{ modulo.isActive ? 'Desactivar' : 'Activar' }}
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr hlmTr>
+          <td hlmTd colspan="5" class="py-8 text-center text-muted-foreground">
+            {{ modulosResource.isLoading() ? 'Cargando…' : 'Sin módulos registrados.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (managingModuloId()) {
+  <div class="border-t border-border bg-muted/20 p-4">
+    <div class="mb-3 flex items-center justify-between">
+      <p class="text-sm font-medium text-foreground">Dependencias de {{ nombreModulo(managingModuloId()!) }}</p>
+      <button hlmBtn variant="ghost" size="sm" (click)="cerrarDependencias()">Cerrar</button>
+    </div>
+
+    @if (depError()) {
+      <p class="mb-2 text-sm text-destructive">{{ depError() }}</p>
+    }
+
+    @if (dependenciasResource.isLoading()) {
+      <p class="text-sm text-muted-foreground">Cargando dependencias…</p>
+    } @else {
+      <div class="space-y-1.5">
+        @for (dep of dependenciasResource.value(); track dep.idModuloReq) {
+          <div class="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm">
+            <span>
+              Requiere <span class="font-medium">{{ nombreModulo(dep.idModuloReq) }}</span>
+              <span hlmBadge [variant]="dep.esHard ? 'destructive' : 'outline'" class="ml-2">{{
+                dep.esHard ? 'hard' : 'soft'
+              }}</span>
+            </span>
+            <button hlmBtn variant="ghost" size="sm" (click)="eliminarDependencia(dep.idModuloReq)">
+              <ng-icon name="lucideTrash2" size="14" />
+            </button>
+          </div>
+        } @empty {
+          <p class="text-sm text-muted-foreground">Sin dependencias configuradas.</p>
+        }
+      </div>
+
+      <div class="mt-3 flex flex-wrap items-end gap-3">
+        <div class="space-y-1.5">
+          <label hlmLabel for="dep-modulo">Depende de</label>
+          <select
+            id="dep-modulo"
+            class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none"
+            [ngModel]="nuevaDependenciaId()"
+            (ngModelChange)="nuevaDependenciaId.set($event)"
+          >
+            <option [ngValue]="undefined">Selecciona un módulo…</option>
+            @for (candidato of candidatosDependencia(); track candidato.id) {
+              <option [ngValue]="candidato.id">{{ candidato.nombre }}</option>
+            }
+          </select>
+        </div>
+        <label class="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            class="size-4 rounded border-input accent-moldhea-600"
+            [ngModel]="nuevaDependenciaHard()"
+            (ngModelChange)="nuevaDependenciaHard.set($event)"
+          />
+          Obligatoria (hard)
+        </label>
+        <button hlmBtn size="sm" [disabled]="!nuevaDependenciaId()" (click)="agregarDependencia()">Agregar</button>
+      </div>
+    }
+  </div>
+}

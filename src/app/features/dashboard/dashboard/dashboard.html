@@ -1,0 +1,121 @@
+<moldhea-page-header
+  title="Dashboard"
+  subtitle="Resumen general de tenants y licencias de productos Moldhea"
+/>
+
+@if (metricsResource.error()) {
+  <p class="py-8 text-center text-sm text-destructive">
+    No se pudieron cargar las métricas. Verifica la conexión con el backend.
+  </p>
+} @else if (metricsResource.value(); as metrics) {
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <moldhea-stat-card
+      label="Tenants totales"
+      [value]="metrics.totalTenants"
+      icon="lucideBuilding2"
+      hint="Cuentas registradas"
+    />
+    <moldhea-stat-card
+      label="Licencias activas"
+      [value]="metrics.totalLicenciasActivas"
+      icon="lucideKeyRound"
+      hint="ACTIVA + TRIAL"
+    />
+    <moldhea-stat-card
+      label="Por vencer (7 días)"
+      [value]="metrics.proximasAVencer7dias"
+      icon="lucideClock"
+      hint="Requieren seguimiento"
+    />
+    <moldhea-stat-card
+      label="Revenue del mes"
+      [value]="(metrics.revenueMesActual | number: '1.0-0')"
+      icon="lucideTrendingUp"
+      [hint]="revenueDelta() !== null ? (revenueDelta()! >= 0 ? '+' : '') + (revenueDelta() | number: '1.1-1') + '% vs mes anterior' : 'Sin dato del mes anterior'"
+    />
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div hlmCard>
+      <div hlmCardHeader>
+        <h3 hlmCardTitle>Licencias por estatus</h3>
+      </div>
+      <div hlmCardContent class="space-y-2">
+        @for (entry of metrics.licenciasPorEstatus | keyvalue; track entry.key) {
+          <div class="flex items-center justify-between text-sm">
+            <span hlmBadge [variant]="estatusVariant(entry.key)" class="capitalize">{{
+              entry.key.toLowerCase()
+            }}</span>
+            <span class="font-medium">{{ entry.value }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div hlmCard>
+      <div hlmCardHeader>
+        <h3 hlmCardTitle>Tenants por estatus</h3>
+      </div>
+      <div hlmCardContent class="space-y-2">
+        @for (entry of metrics.tenantsPorEstatus | keyvalue; track entry.key) {
+          <div class="flex items-center justify-between text-sm">
+            <span class="capitalize text-muted-foreground">{{ entry.key.toLowerCase() }}</span>
+            <span class="font-medium">{{ entry.value }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<div hlmCard class="mt-6">
+  <div hlmCardHeader>
+    <h3 hlmCardTitle>Próximas a vencer</h3>
+    <p hlmCardDescription>Licencias ACTIVA/TRIAL que vencen en los próximos {{ proximasAVencerDias() }} días</p>
+  </div>
+
+  <div hlmCardContent>
+    <div hlmTableContainer>
+      <table hlmTable>
+        <thead hlmTHead>
+          <tr hlmTr>
+            <th hlmTh>Plan</th>
+            <th hlmTh>Tenant</th>
+            <th hlmTh>Vence</th>
+            <th hlmTh>Estatus</th>
+            <th hlmTh></th>
+          </tr>
+        </thead>
+        <tbody hlmTBody>
+          @for (licencia of proximasAVencerResource.value(); track licencia.idLicencia) {
+            <tr hlmTr>
+              <td hlmTd class="font-medium">{{ licencia.planNombre }}</td>
+              <td hlmTd>
+                <a [routerLink]="['/tenants', licencia.idTenant]" class="text-moldhea-600 hover:underline"
+                  >#{{ licencia.idTenant }}</a
+                >
+              </td>
+              <td hlmTd class="text-muted-foreground">{{ licencia.fechaFin }}</td>
+              <td hlmTd>
+                <span hlmBadge [variant]="estatusVariant(licencia.estatus)" class="capitalize">{{
+                  licencia.estatus.toLowerCase()
+                }}</span>
+              </td>
+              <td hlmTd class="text-right">
+                <a [routerLink]="['/licencias', licencia.idLicencia]" class="text-sm font-medium text-moldhea-600 hover:underline">
+                  Ver
+                </a>
+              </td>
+            </tr>
+          } @empty {
+            <tr hlmTr>
+              <td hlmTd colspan="5" class="py-8 text-center text-muted-foreground">
+                {{ proximasAVencerResource.isLoading() ? 'Cargando…' : 'Nada por vencer en este rango.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+<moldhea-page-header
+  title="Catálogo"
+  subtitle="Productos, planes y módulos que arman las licencias de Moldhea"
+/>
+
+<div hlmTabs tab="productos">
+  <div hlmTabsList>
+    <button hlmTabsTrigger="productos">Productos</button>
+    <button hlmTabsTrigger="planes">Planes</button>
+    <button hlmTabsTrigger="modulos">Módulos</button>
+  </div>
+
+  <div hlmTabsContent="productos">
+    <div hlmCard>
+      <moldhea-products-panel />
+    </div>
+  </div>
+
+  <div hlmTabsContent="planes">
+    <div hlmCard>
+      <moldhea-plans-panel />
+    </div>
+  </div>
+
+  <div hlmTabsContent="modulos">
+    <div hlmCard>
+      <moldhea-modules-panel />
+    </div>
+  </div>
+</div>

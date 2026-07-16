@@ -1,0 +1,96 @@
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
+
+@import "@spartan-ng/brain/hlm-tailwind-preset.css";
+/* You can add global styles to this file, and also import other style files */
+
+@theme {
+  /* Moldhea brand blues */
+  --color-moldhea-50: #eef8fe;
+  --color-moldhea-100: #d9eefd;
+  --color-moldhea-200: #b7defb;
+  --color-moldhea-300: #7fc6f7;
+  --color-moldhea-400: #1da3ec; /* celeste - superior izquierdo */
+  --color-moldhea-500: #0086f0; /* azul medio - superior derecho */
+  --color-moldhea-600: #0078d4; /* azul brillante - inferior izquierdo */
+  --color-moldhea-700: #005db3; /* azul oscuro - inferior derecho */
+  --color-moldhea-800: #004a8f;
+  --color-moldhea-900: #073a6e;
+  --color-moldhea-950: #06254a;
+}
+
+:root {
+color-scheme: light;
+
+--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+--radius: 0.625rem;
+--background: oklch(1 0 0);
+--foreground: oklch(0.129 0.042 264.695);
+--card: oklch(1 0 0);
+--card-foreground: oklch(0.129 0.042 264.695);
+--popover: oklch(1 0 0);
+--popover-foreground: oklch(0.129 0.042 264.695);
+--primary: var(--color-moldhea-600);
+--primary-foreground: oklch(0.984 0.003 247.858);
+--secondary: oklch(0.968 0.007 247.896);
+--secondary-foreground: oklch(0.208 0.042 265.755);
+--muted: oklch(0.968 0.007 247.896);
+--muted-foreground: oklch(0.554 0.046 257.417);
+--accent: var(--color-moldhea-50);
+--accent-foreground: var(--color-moldhea-700);
+--destructive: oklch(0.577 0.245 27.325);
+--border: oklch(0.929 0.013 255.508);
+--input: oklch(0.929 0.013 255.508);
+--ring: var(--color-moldhea-400);
+--sidebar: var(--color-moldhea-950);
+--sidebar-foreground: oklch(0.984 0.003 247.858);
+--sidebar-primary: var(--color-moldhea-500);
+--sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+--sidebar-accent: color-mix(in oklab, var(--color-moldhea-900) 60%, transparent);
+--sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+--sidebar-border: color-mix(in oklab, white 10%, transparent);
+--sidebar-ring: var(--color-moldhea-400);
+}
+
+:root.dark {
+color-scheme: dark;
+
+--background: oklch(0.129 0.042 264.695);
+--foreground: oklch(0.984 0.003 247.858);
+--card: oklch(0.208 0.042 265.755);
+--card-foreground: oklch(0.984 0.003 247.858);
+--popover: oklch(0.208 0.042 265.755);
+--popover-foreground: oklch(0.984 0.003 247.858);
+--primary: var(--color-moldhea-500);
+--primary-foreground: oklch(0.129 0.042 264.695);
+--secondary: oklch(0.279 0.041 260.031);
+--secondary-foreground: oklch(0.984 0.003 247.858);
+--muted: oklch(0.279 0.041 260.031);
+--muted-foreground: oklch(0.704 0.04 256.788);
+--accent: oklch(0.279 0.041 260.031);
+--accent-foreground: var(--color-moldhea-300);
+--destructive: oklch(0.704 0.191 22.216);
+--border: oklch(1 0 0 / 10%);
+--input: oklch(1 0 0 / 15%);
+--ring: var(--color-moldhea-400);
+--sidebar: var(--color-moldhea-950);
+--sidebar-foreground: oklch(0.984 0.003 247.858);
+--sidebar-primary: var(--color-moldhea-500);
+--sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+--sidebar-accent: color-mix(in oklab, var(--color-moldhea-900) 60%, transparent);
+--sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+--sidebar-border: oklch(1 0 0 / 10%);
+--sidebar-ring: var(--color-moldhea-400);
+}
+
+@layer base {
+* {
+@apply border-border outline-ring/50;
+}
+body {
+@apply bg-background text-foreground;
+}
+}

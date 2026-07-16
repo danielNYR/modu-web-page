@@ -1,0 +1,68 @@
+<div class="flex items-center justify-between border-b border-border p-4">
+  <p class="text-sm text-muted-foreground">{{ productosResource.value().length }} productos</p>
+  <button hlmBtn size="sm" (click)="showForm.set(!showForm())">
+    <ng-icon name="lucidePlus" size="16" />
+    Nuevo producto
+  </button>
+</div>
+
+@if (error()) {
+  <p class="border-b border-border px-4 py-2 text-sm text-destructive">{{ error() }}</p>
+}
+
+@if (showForm()) {
+  <div class="flex flex-wrap items-end gap-3 border-b border-border bg-muted/30 p-4">
+    <div class="space-y-1.5">
+      <label hlmLabel for="p-slug">Slug</label>
+      <input hlmInput id="p-slug" [ngModel]="slug()" (ngModelChange)="slug.set($event)" placeholder="erp" />
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="p-nombre">Nombre</label>
+      <input hlmInput id="p-nombre" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Moldhea ERP" />
+    </div>
+    <button hlmBtn size="sm" [disabled]="saving()" (click)="crear()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
+    <button hlmBtn variant="ghost" size="sm" (click)="showForm.set(false)">Cancelar</button>
+  </div>
+}
+
+<div hlmTableContainer>
+  <table hlmTable>
+    <thead hlmTHead>
+      <tr hlmTr>
+        <th hlmTh>Nombre</th>
+        <th hlmTh>Slug</th>
+        <th hlmTh>Estado</th>
+        <th hlmTh></th>
+      </tr>
+    </thead>
+    <tbody hlmTBody>
+      @for (producto of productosResource.value(); track producto.id) {
+        <tr hlmTr>
+          <td hlmTd class="font-medium">{{ producto.nombre }}</td>
+          <td hlmTd class="font-mono text-xs text-muted-foreground">{{ producto.slug }}</td>
+          <td hlmTd>
+            <span hlmBadge [variant]="producto.isActive ? 'default' : 'outline'">{{
+              producto.isActive ? 'Activo' : 'Inactivo'
+            }}</span>
+          </td>
+          <td hlmTd class="text-right">
+            <button
+              hlmBtn
+              variant="ghost"
+              size="sm"
+              (click)="cambiarEstado(producto.id, !producto.isActive)"
+            >
+              {{ producto.isActive ? 'Desactivar' : 'Activar' }}
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr hlmTr>
+          <td hlmTd colspan="4" class="py-8 text-center text-muted-foreground">
+            {{ productosResource.isLoading() ? 'Cargando…' : 'Sin productos registrados.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

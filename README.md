@@ -1,241 +1,76 @@
-# Modu - Static Commercial Webpage
+# Moldhea Accounts Frontend
 
-A modern, responsive commercial webpage built with Tailwind CSS and vanilla JavaScript, featuring a contact form that integrates with Spring Boot backend.
+Sistema interno de Moldhea para el control de tenants, licencias y catálogo de productos/planes/módulos, integrado contra el backend `modhub`. Ver `/Users/danielnava/Documents/Moldhea/Backend/modhub/instrucciones_frontend.md` para el contrato de la API.
 
-## 🚀 Features
+## Stack
 
-- **Modern Design**: Clean, professional design with gradient backgrounds and smooth animations
-- **Responsive Layout**: Fully responsive design that works on desktop, tablet, and mobile
-- **Tailwind CSS**: Utility-first CSS framework for fast development
-- **Contact Form**: Functional contact form with validation and Spring Boot integration
-- **Smooth Scrolling**: Enhanced navigation experience with smooth scrolling
-- **SEO Optimized**: Semantic HTML and proper meta tags for search engines
-- **Accessibility**: Built with accessibility best practices
+- **Angular 22** (standalone, zoneless, signals, `httpResource`) + **Angular CLI**
+- **Tailwind CSS v4**
+- **Spartan/ui** (`@spartan-ng/brain` + `helm`) — componentes accesibles estilo shadcn para Angular
+- **pnpm** como gestor de paquetes
 
-## 📁 Project Structure
+## Configuración del backend (requerido antes de correr la app)
 
-```
-modu-web-page/
-├── index.html                  # Main homepage
-├── pages/
-│   ├── about.html             # About us page
-│   └── contact.html           # Dedicated contact page
-├── assets/
-│   ├── css/
-│   │   ├── input.css          # Tailwind input file
-│   │   └── style.css          # Compiled Tailwind CSS
-│   └── js/
-│       └── main.js            # JavaScript functionality
-├── components/                 # Reusable HTML components
-├── package.json               # Dependencies and scripts
-├── tailwind.config.js         # Tailwind configuration
-├── SPRING_INTEGRATION.md      # Spring Boot integration guide
-└── README.md                  # This file
-```
+`modhub` exige el header `X-Internal-Api-Key` en cada request. Esa key **no vive en el bundle**: se carga en runtime desde `public/app-config.json` (gitignored).
 
-## 🛠️ Technology Stack
-
-### Frontend
-- **HTML5**: Semantic markup
-- **Tailwind CSS**: Utility-first CSS framework
-- **Vanilla JavaScript**: Contact form handling and interactions
-- **Font Awesome**: Icons
-- **Google Fonts**: Inter font family
-
-### Backend Integration
-- **Spring Boot**: REST API backend
-- **JSON**: Data exchange format
-- **Fetch API**: HTTP client for form submission
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
-
-### Installation
-
-1. **Clone the repository**
 ```bash
-git clone <repository-url>
-cd modu-web-page
+cp public/app-config.example.json public/app-config.json
+# edita apiBaseUrl e internalApiKey con los valores reales de modhub
 ```
 
-2. **Install dependencies**
+Si `app-config.json` no existe o el backend no responde, la app carga igual (es una SPA), pero cada pantalla que consume datos mostrará su estado de error.
+
+> Nota de seguridad (ver instrucciones_frontend.md §9): esto es una solución interina para desarrollo. Para producción, la API key no debería llegar al navegador — lo correcto es un backend/proxy propio que la inyecte del lado servidor.
+
+## Arquitectura
+
+```
+src/app/
+├── core/
+│   ├── config/             # AppConfigService (carga app-config.json antes del bootstrap)
+│   ├── http/                # interceptor de API key + parseo de errores del backend
+│   ├── models/               # Page<T>, enums del dominio, mapeo estatus→badge
+│   └── nav/                  # definición del menú lateral
+├── layout/shell/             # shell del dashboard: sidebar + topbar + router-outlet
+├── shared/components/        # page-header, stat-card, pagination
+└── features/
+    ├── auth/login/           # login (solo visual, sin auth real todavía)
+    ├── dashboard/             # métricas reales (/api/admin/metrics)
+    ├── tenants/               # /api/admin/tenants (solo lectura) — listado + detalle
+    ├── licenses/              # /api/licencias — listado, detalle, generar/renovar, revocar, extender
+    ├── catalog/               # /api/admin/catalogo — productos, planes (+módulos), módulos (+dependencias)
+    ├── notifications/         # /api/admin/notificaciones — log + envío de prueba
+    └── audit/                 # /api/admin/auditoria — log con filtros excluyentes
+
+libs/ui/                       # componentes de Spartan/ui (button, card, table, input, badge, tabs, etc.)
+```
+
+Cada feature sigue el patrón `features/<nombre>/{models,data,<páginas>}` con rutas `loadComponent` en `app.routes.ts`. Los servicios de datos (`*.service.ts`) usan `httpResource` para GET reactivos (listas/detalle, con `.isLoading()`/`.error()`/`.reload()` gratis) y `HttpClient` directo para mutaciones (POST/PUT/PATCH/DELETE).
+
+## Marca
+
+Los colores primarios (`moldhea-400` a `moldhea-700` en Tailwind, ver `src/styles.css`) están tomados de la identidad de Moldhea:
+
+| Tono | Uso | Hex |
+| --- | --- | --- |
+| Celeste | superior izquierdo | `#1DA3EC` |
+| Azul medio | superior derecho | `#0086F0` |
+| Azul brillante | inferior izquierdo | `#0078D4` |
+| Azul oscuro | inferior derecho | `#005DB3` |
+
+## Desarrollo
+
 ```bash
-npm install
+pnpm install
+cp public/app-config.example.json public/app-config.json   # completar con la key real
+pnpm start        # ng serve, http://localhost:4200
+pnpm run build    # build de producción
 ```
 
-3. **Build CSS (for development)**
-```bash
-npm run build-css
-```
+## Estado actual / pendiente de validar
 
-4. **Build CSS (for production)**
-```bash
-npm run build
-```
-
-5. **Start development server**
-```bash
-npm run dev
-```
-
-The website will be available at `http://localhost:3000`
-
-## 📱 Pages
-
-### Homepage (`index.html`)
-- Hero section with call-to-action
-- Services overview
-- About section with statistics
-- Client testimonials
-- Contact form
-- Footer with links
-
-### About Page (`pages/about.html`)
-- Company story and mission
-- Core values
-- Team showcase
-- Call-to-action section
-
-### Contact Page (`pages/contact.html`)
-- Detailed contact information
-- Enhanced contact form with additional fields
-- FAQ section
-- Map placeholder
-
-## 🔧 Customization
-
-### Colors
-Update the color scheme in `tailwind.config.js`:
-
-```javascript
-theme: {
-  extend: {
-    colors: {
-      primary: {
-        // Your primary colors
-      },
-      accent: {
-        // Your accent colors
-      }
-    }
-  }
-}
-```
-
-### Typography
-Modify font families in `tailwind.config.js` and update the Google Fonts link in HTML files.
-
-### Content
-- Update company information in HTML files
-- Modify service offerings and descriptions
-- Replace placeholder images and icons
-- Update contact information
-
-## 📧 Contact Form Integration
-
-The contact form is designed to work with a Spring Boot backend. See `SPRING_INTEGRATION.md` for detailed setup instructions.
-
-### Configuration
-Update the API endpoint in `assets/js/main.js`:
-
-```javascript
-const CONFIG = {
-    API_BASE_URL: 'http://your-spring-app.com/api',
-    CONTACT_ENDPOINT: '/contact',
-    // ... other settings
-};
-```
-
-### Features
-- Client-side validation
-- Loading states
-- Error handling
-- Success feedback
-- CORS support
-- Request timeout handling
-
-## 🎨 Design System
-
-### Component Classes
-- `.btn-primary` - Primary button style
-- `.btn-secondary` - Secondary button style
-- `.card` - Card component
-- `.form-input` - Form input styling
-- `.section-padding` - Consistent section spacing
-- `.container-custom` - Container with max-width
-
-### Utility Classes
-- `.text-balance` - Text balancing
-- `.gradient-bg` - Gradient background
-
-## 📱 Responsive Design
-
-The website is fully responsive with breakpoints:
-- Mobile: 320px - 768px
-- Tablet: 768px - 1024px
-- Desktop: 1024px+
-
-## 🚀 Deployment
-
-### Static Hosting
-Deploy to any static hosting service:
-- Netlify
-- Vercel
-- GitHub Pages
-- AWS S3 + CloudFront
-
-### Build for Production
-```bash
-npm run build
-```
-
-This creates an optimized CSS file for production use.
-
-## 🔒 Security Considerations
-
-- Input validation on both client and server
-- CSRF protection (configure in Spring Boot)
-- Rate limiting (implement in backend)
-- HTTPS in production
-- Environment variables for sensitive data
-
-## 📈 Performance
-
-- Minified CSS in production
-- Optimized images (use appropriate formats and sizes)
-- Lazy loading for images below the fold
-- CDN for external resources
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test responsiveness across devices
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For questions about Spring Boot integration, see `SPRING_INTEGRATION.md`.
-
-For general support:
-- Check the documentation
-- Open an issue
-- Contact: hello@modu.com
-
-## 🏗️ Future Enhancements
-
-- [ ] Add blog functionality
-- [ ] Implement dark mode
-- [ ] Add animations library (AOS, Framer Motion)
-- [ ] Multi-language support
-- [ ] Analytics integration
-- [ ] Performance monitoring
-- [ ] A/B testing capabilities
+- Login visual (sin autenticación real todavía — la API key de modhub es de servicio, no de usuario final).
+- Todas las pantallas quedaron cableadas contra los endpoints reales de `instrucciones_frontend.md`, pero **no se han probado contra un backend corriendo** — falta esa validación conjunta.
+- `TenantListItemResponse` / `TenantDetailResponse` / `UsuarioResumenResponse` no tienen shape exacto documentado; los campos en `features/tenants/models/tenant.model.ts` son el mejor esfuerzo a partir del dominio descrito y deben verificarse contra payloads reales.
+- La validación client-side de dependencias "hard" al asignar módulos a un plan no está implementada (el backend la re-valida en `PUT /planes/{id}/modulos`); por ahora solo se muestra el error 400 que regrese.
+- No hay pantalla dedicada para `/api/admin/metrics/revenue` ni `/api/admin/metrics/churn` — el dashboard solo usa `/metrics/dashboard` y `/metrics/licencias/proximas-a-vencer`.

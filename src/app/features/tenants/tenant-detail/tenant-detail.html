@@ -1,0 +1,102 @@
+<a routerLink="/tenants" class="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+  <ng-icon name="lucideArrowLeft" size="16" />
+  Volver a tenants
+</a>
+
+@if (tenantResource.error()) {
+  <p class="py-8 text-center text-sm text-destructive">No se pudo cargar el tenant.</p>
+} @else if (tenantResource.isLoading()) {
+  <p class="py-8 text-center text-sm text-muted-foreground">Cargando tenant…</p>
+} @else if (tenantResource.value(); as tenant) {
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight text-foreground">{{ tenant.nombre }}</h1>
+      <p class="mt-1 text-sm text-muted-foreground">Tenant #{{ tenant.idTenant }}</p>
+    </div>
+    <span hlmBadge [variant]="tenantEstatusVariant[tenant.estatus]" class="capitalize">{{
+      tenant.estatus.toLowerCase()
+    }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div hlmCard>
+      <div hlmCardHeader>
+        <h3 hlmCardTitle>Usuarios</h3>
+        <p hlmCardDescription>Personas con acceso a este tenant</p>
+      </div>
+      <div hlmCardContent>
+        <div hlmTableContainer>
+          <table hlmTable>
+            <thead hlmTHead>
+              <tr hlmTr>
+                <th hlmTh>Nombre</th>
+                <th hlmTh>Correo</th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (usuario of tenant.usuarios; track usuario.idUsuario) {
+                <tr hlmTr>
+                  <td hlmTd class="font-medium">{{ usuario.nombre }}</td>
+                  <td hlmTd class="text-muted-foreground">{{ usuario.email }}</td>
+                </tr>
+              } @empty {
+                <tr hlmTr>
+                  <td hlmTd colspan="2" class="py-6 text-center text-muted-foreground">
+                    Sin usuarios registrados.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div hlmCard>
+      <div hlmCardHeader>
+        <h3 hlmCardTitle>Licencias</h3>
+        <p hlmCardDescription>Historial completo de licencias del tenant</p>
+      </div>
+      <div hlmCardContent>
+        <div hlmTableContainer>
+          <table hlmTable>
+            <thead hlmTHead>
+              <tr hlmTr>
+                <th hlmTh>Plan</th>
+                <th hlmTh>Periodo</th>
+                <th hlmTh>Vence</th>
+                <th hlmTh>Estatus</th>
+                <th hlmTh></th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (licencia of tenant.licencias; track licencia.idLicencia) {
+                <tr hlmTr>
+                  <td hlmTd class="font-medium">{{ licencia.planNombre }}</td>
+                  <td hlmTd class="capitalize">{{ licencia.periodo.toLowerCase() }}</td>
+                  <td hlmTd class="text-muted-foreground">{{ licencia.fechaFin ?? 'Sin vencimiento' }}</td>
+                  <td hlmTd>
+                    <span hlmBadge [variant]="licenciaEstatusVariant[licencia.estatus]" class="capitalize">{{
+                      licencia.estatus.toLowerCase()
+                    }}</span>
+                  </td>
+                  <td hlmTd class="text-right">
+                    <a [routerLink]="['/licencias', licencia.idLicencia]" class="text-sm font-medium text-moldhea-600 hover:underline">
+                      Ver
+                    </a>
+                  </td>
+                </tr>
+              } @empty {
+                <tr hlmTr>
+                  <td hlmTd colspan="5" class="py-6 text-center text-muted-foreground">
+                    Sin licencias registradas.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+}

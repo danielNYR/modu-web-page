@@ -1,0 +1,96 @@
+<moldhea-page-header title="Tenants" subtitle="Cuentas cliente registradas en Moldhea Accounts" />
+
+<div hlmCard>
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+    <div class="flex flex-wrap items-center gap-2">
+      @for (filter of filters; track filter.value) {
+        <button
+          type="button"
+          (click)="setFilter(filter.value)"
+          class="rounded-full px-3 py-1 text-sm font-medium whitespace-nowrap transition-colors"
+          [class]="
+            activeFilter() === filter.value
+              ? 'bg-moldhea-600 text-white'
+              : 'bg-muted text-muted-foreground hover:bg-muted/70'
+          "
+        >
+          {{ filter.label }}
+        </button>
+      }
+    </div>
+
+    <label
+      class="flex w-full max-w-xs items-center gap-2 rounded-md border border-input px-3 py-1.5 text-sm text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50"
+    >
+      <ng-icon name="lucideSearch" size="16" />
+      <input
+        type="search"
+        placeholder="Buscar por nombre…"
+        class="w-full bg-transparent outline-none placeholder:text-muted-foreground"
+        [ngModel]="search()"
+        (ngModelChange)="onSearch($event)"
+        [disabled]="activeFilter() !== 'todos'"
+      />
+    </label>
+  </div>
+
+  @if (activeFilter() !== 'todos' && search()) {
+    <p class="border-b border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+      El filtro de estatus tiene prioridad sobre la búsqueda por nombre (no se combinan).
+    </p>
+  }
+
+  <div hlmCardContent>
+    @if (tenantsResource.error()) {
+      <p class="py-8 text-center text-sm text-destructive">
+        No se pudo cargar el listado de tenants. Verifica la conexión con el backend.
+      </p>
+    } @else {
+      <div hlmTableContainer>
+        <table hlmTable>
+          <thead hlmTHead>
+            <tr hlmTr>
+              <th hlmTh>Tenant</th>
+              <th hlmTh>Estatus</th>
+              <th hlmTh>Alta</th>
+              <th hlmTh></th>
+            </tr>
+          </thead>
+          <tbody hlmTBody>
+            @for (tenant of tenantsResource.value().content; track tenant.idTenant) {
+              <tr hlmTr>
+                <td hlmTd class="font-medium">{{ tenant.nombre }}</td>
+                <td hlmTd>
+                  <span hlmBadge [variant]="estatusVariant(tenant.estatus)" class="capitalize">{{
+                    tenant.estatus.toLowerCase()
+                  }}</span>
+                </td>
+                <td hlmTd class="text-muted-foreground">{{ tenant.creadoEn ?? '—' }}</td>
+                <td hlmTd class="text-right">
+                  <a [routerLink]="['/tenants', tenant.idTenant]" class="text-sm font-medium text-moldhea-600 hover:underline">
+                    Ver detalle
+                  </a>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTr>
+                <td hlmTd colspan="4" class="py-8 text-center text-muted-foreground">
+                  {{ tenantsResource.isLoading() ? 'Cargando tenants…' : 'No se encontraron tenants.' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <moldhea-pagination
+    [page]="tenantsResource.value().number"
+    [totalPages]="tenantsResource.value().totalPages"
+    [totalElements]="tenantsResource.value().totalElements"
+    [first]="tenantsResource.value().first"
+    [last]="tenantsResource.value().last"
+    (pageChange)="page.set($event)"
+  />
+</div>

@@ -1,0 +1,130 @@
+<moldhea-page-header title="Notificaciones" subtitle="Log de correos de ciclo de vida de licencias">
+  <button pageHeaderActions hlmBtn variant="outline" (click)="showTest.set(!showTest())">
+    <ng-icon name="lucideSend" size="16" />
+    Enviar prueba
+  </button>
+</moldhea-page-header>
+
+@if (showTest()) {
+  <div hlmCard class="mb-6 max-w-lg">
+    <div hlmCardContent class="space-y-3">
+      @if (testResult()) {
+        <p class="text-sm text-moldhea-700">{{ testResult() }}</p>
+      }
+      @if (testError()) {
+        <p class="text-sm text-destructive">{{ testError() }}</p>
+      }
+      <div class="grid grid-cols-2 gap-3">
+        <div class="space-y-1.5">
+          <label hlmLabel for="test-destinatario">Destinatario</label>
+          <input
+            hlmInput
+            id="test-destinatario"
+            type="email"
+            placeholder="correo@ejemplo.com"
+            [ngModel]="testDestinatario()"
+            (ngModelChange)="testDestinatario.set($event)"
+          />
+        </div>
+        <div class="space-y-1.5">
+          <label hlmLabel for="test-tipo">Tipo de evento</label>
+          <select
+            id="test-tipo"
+            class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none"
+            [ngModel]="testTipoEvento()"
+            (ngModelChange)="testTipoEvento.set($event)"
+          >
+            @for (tipo of tiposEvento; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <button hlmBtn size="sm" [disabled]="testSending() || !testDestinatario()" (click)="enviarPrueba()">
+        {{ testSending() ? 'Enviando…' : 'Enviar correo de prueba' }}
+      </button>
+      <p class="text-xs text-muted-foreground">
+        Envía un correo real por el canal configurado en el backend; no queda registrado en este log.
+      </p>
+    </div>
+  </div>
+}
+
+<div hlmCard>
+  <div class="flex flex-wrap items-center gap-3 border-b border-border p-4">
+    <input
+      hlmInput
+      type="number"
+      placeholder="ID de licencia"
+      class="w-40"
+      [ngModel]="idLicencia()"
+      (ngModelChange)="onIdLicenciaChange($event)"
+    />
+    <select
+      class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none"
+      [ngModel]="tipoEvento()"
+      (ngModelChange)="onTipoEventoChange($event)"
+      [disabled]="!!idLicencia()"
+    >
+      <option value="">Todos los eventos</option>
+      @for (tipo of tiposEvento; track tipo) {
+        <option [value]="tipo">{{ tipo }}</option>
+      }
+    </select>
+    @if (idLicencia() && tipoEvento()) {
+      <p class="text-xs text-muted-foreground">idLicencia tiene prioridad sobre tipoEvento (no se combinan).</p>
+    }
+  </div>
+
+  <div hlmCardContent>
+    @if (logResource.error()) {
+      <p class="py-8 text-center text-sm text-destructive">No se pudo cargar el log de notificaciones.</p>
+    } @else {
+      <div hlmTableContainer>
+        <table hlmTable>
+          <thead hlmTHead>
+            <tr hlmTr>
+              <th hlmTh>Licencia</th>
+              <th hlmTh>Evento</th>
+              <th hlmTh>Fecha objetivo</th>
+              <th hlmTh>Canal</th>
+              <th hlmTh>Destinatario</th>
+              <th hlmTh>Estatus</th>
+              <th hlmTh>Enviado</th>
+            </tr>
+          </thead>
+          <tbody hlmTBody>
+            @for (log of logResource.value().content; track log.id) {
+              <tr hlmTr>
+                <td hlmTd>#{{ log.idLicencia }}</td>
+                <td hlmTd class="font-medium">{{ log.tipoEvento }}</td>
+                <td hlmTd class="text-muted-foreground">{{ log.fechaObjetivo }}</td>
+                <td hlmTd>{{ log.canal }}</td>
+                <td hlmTd class="text-muted-foreground">{{ log.destinatario ?? '—' }}</td>
+                <td hlmTd>
+                  <span hlmBadge [variant]="estatusVariant[log.estatus]">{{ log.estatus }}</span>
+                </td>
+                <td hlmTd class="text-muted-foreground">{{ log.enviadoAt ?? '—' }}</td>
+              </tr>
+            } @empty {
+              <tr hlmTr>
+                <td hlmTd colspan="7" class="py-8 text-center text-muted-foreground">
+                  {{ logResource.isLoading() ? 'Cargando…' : 'Sin notificaciones registradas.' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <moldhea-pagination
+    [page]="logResource.value().number"
+    [totalPages]="logResource.value().totalPages"
+    [totalElements]="logResource.value().totalElements"
+    [first]="logResource.value().first"
+    [last]="logResource.value().last"
+    (pageChange)="page.set($event)"
+  />
+</div>

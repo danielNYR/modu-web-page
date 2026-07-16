@@ -1,0 +1,36 @@
+export interface Plan {
+  id: number;
+  idProducto: number;
+  slug: string;
+  nombre: string;
+  precioMensual: number;
+  precioAnual: number;
+  moneda: string;
+  trialDias: number;
+  isActive: boolean;
+}
+
+export interface PlanRequest {
+  idProducto: number;
+  slug: string;
+  nombre: string;
+  precioMensual: number;
+  precioAnual: number;
+  moneda?: string;
+  trialDias?: number;
+  isActive?: boolean;
+}
+
+export interface PlanModulo {
+  idModulo: number;
+  limiteUso: number | null;
+  unidadLimite: string | null;
+  habilitado: boolean;
+}
+
+export interface PlanModuloRequest {
+  idModulo: number;
+  limiteUso?: number | null;
+  unidadLimite?: string | null;
+  habilitado: boolean;
+}

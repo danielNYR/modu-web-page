@@ -1,0 +1,14 @@
+<div hlmCard class="p-5">
+  <div class="flex items-start justify-between">
+    <div>
+      <p class="text-sm text-muted-foreground">{{ label() }}</p>
+      <p class="mt-2 text-3xl font-semibold tracking-tight text-foreground">{{ value() }}</p>
+      @if (hint()) {
+        <p class="mt-1 text-xs text-muted-foreground">{{ hint() }}</p>
+      }
+    </div>
+    <div class="flex size-10 items-center justify-center rounded-lg bg-moldhea-50 text-moldhea-600">
+      <ng-icon [name]="icon()" size="20" />
+    </div>
+  </div>
+</div>

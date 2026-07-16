@@ -1,0 +1,120 @@
+<moldhea-page-header title="Licencias" subtitle="Licencias emitidas para los productos de Moldhea">
+  <a pageHeaderActions hlmBtn routerLink="/licencias/nueva">
+    <ng-icon name="lucidePlus" size="16" />
+    Nueva licencia
+  </a>
+</moldhea-page-header>
+
+<div hlmCard>
+  <div class="flex flex-wrap items-center gap-2 border-b border-border p-4">
+    @for (filter of filters; track filter.value) {
+      <button
+        type="button"
+        (click)="setFilter(filter.value)"
+        class="rounded-full px-3 py-1 text-sm font-medium whitespace-nowrap transition-colors"
+        [class]="
+          activeFilter() === filter.value
+            ? 'bg-moldhea-600 text-white'
+            : 'bg-muted text-muted-foreground hover:bg-muted/70'
+        "
+      >
+        {{ filter.label }}
+      </button>
+    }
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 border-b border-border p-4">
+    <select
+      class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+      [ngModel]="idProducto()"
+      (ngModelChange)="onProductoChange($event)"
+    >
+      <option [ngValue]="undefined">Todos los productos</option>
+      @for (producto of productosResource.value(); track producto.id) {
+        <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+      }
+    </select>
+
+    <input
+      hlmInput
+      type="number"
+      placeholder="ID de tenant"
+      class="w-36"
+      [ngModel]="idTenant()"
+      (ngModelChange)="onTenantChange($event)"
+    />
+
+    <input
+      hlmInput
+      type="number"
+      placeholder="Vencen en (días)"
+      class="w-40"
+      [ngModel]="proximasAVencerDias()"
+      (ngModelChange)="onProximasAVencerChange($event)"
+    />
+  </div>
+
+  <div hlmCardContent>
+    @if (licensesResource.error()) {
+      <p class="py-8 text-center text-sm text-destructive">
+        No se pudo cargar el listado de licencias. Verifica la conexión con el backend.
+      </p>
+    } @else {
+      <div hlmTableContainer>
+        <table hlmTable>
+          <thead hlmTHead>
+            <tr hlmTr>
+              <th hlmTh>Plan</th>
+              <th hlmTh>Tenant</th>
+              <th hlmTh>Periodo</th>
+              <th hlmTh>Despliegue</th>
+              <th hlmTh>Vence</th>
+              <th hlmTh>Estatus</th>
+              <th hlmTh></th>
+            </tr>
+          </thead>
+          <tbody hlmTBody>
+            @for (licencia of licensesResource.value().content; track licencia.idLicencia) {
+              <tr hlmTr>
+                <td hlmTd class="font-medium">{{ licencia.planNombre }}</td>
+                <td hlmTd>
+                  <a [routerLink]="['/tenants', licencia.idTenant]" class="text-moldhea-600 hover:underline"
+                    >#{{ licencia.idTenant }}</a
+                  >
+                </td>
+                <td hlmTd class="capitalize">{{ licencia.periodo.toLowerCase() }}</td>
+                <td hlmTd class="capitalize text-muted-foreground">{{ licencia.tipoDespliegue.toLowerCase() }}</td>
+                <td hlmTd class="text-muted-foreground">{{ licencia.fechaFin ?? 'Sin vencimiento' }}</td>
+                <td hlmTd>
+                  <span hlmBadge [variant]="badgeVariant(licencia.estatus)" class="capitalize">{{
+                    licencia.estatus.toLowerCase()
+                  }}</span>
+                </td>
+                <td hlmTd class="text-right">
+                  <a [routerLink]="['/licencias', licencia.idLicencia]" class="text-sm font-medium text-moldhea-600 hover:underline">
+                    Ver
+                  </a>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTr>
+                <td hlmTd colspan="7" class="py-8 text-center text-muted-foreground">
+                  {{ licensesResource.isLoading() ? 'Cargando licencias…' : 'No se encontraron licencias con estos filtros.' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <moldhea-pagination
+    [page]="licensesResource.value().number"
+    [totalPages]="licensesResource.value().totalPages"
+    [totalElements]="licensesResource.value().totalElements"
+    [first]="licensesResource.value().first"
+    [last]="licensesResource.value().last"
+    (pageChange)="page.set($event)"
+  />
+</div>

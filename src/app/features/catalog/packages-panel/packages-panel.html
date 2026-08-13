@@ -1,0 +1,119 @@
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+  <select
+    class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+    [ngModel]="filterProducto()"
+    (ngModelChange)="filterProducto.set($event)"
+  >
+    <option [ngValue]="undefined">Todos los productos</option>
+    @for (producto of productosResource.value(); track producto.idProducto) {
+      <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
+    }
+  </select>
+
+  <button hlmBtn size="sm" (click)="showForm.set(!showForm())">
+    <ng-icon name="lucidePlus" size="16" />
+    Nuevo paquete
+  </button>
+</div>
+
+@if (error()) {
+  <p class="border-b border-border px-4 py-2 text-sm text-destructive">{{ error() }}</p>
+}
+
+@if (showForm()) {
+  <div class="grid grid-cols-2 gap-3 border-b border-border bg-muted/30 p-4 sm:grid-cols-3">
+    <div class="space-y-1.5">
+      <label hlmLabel for="pq-producto">Producto</label>
+      <select
+        id="pq-producto"
+        class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none"
+        [ngModel]="formProducto()"
+        (ngModelChange)="formProducto.set($event)"
+      >
+        <option [ngValue]="undefined">Selecciona…</option>
+        @for (producto of productosResource.value(); track producto.idProducto) {
+          <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
+        }
+      </select>
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="pq-slug">Slug</label>
+      <input hlmInput id="pq-slug" [ngModel]="slug()" (ngModelChange)="slug.set($event)" placeholder="mesa_viva" />
+    </div>
+    <div class="space-y-1.5">
+      <label hlmLabel for="pq-nombre">Nombre</label>
+      <input hlmInput id="pq-nombre" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Mesa Viva" />
+    </div>
+    <div class="col-span-full space-y-1.5">
+      <label hlmLabel for="pq-descripcion">Descripción</label>
+      <input
+        hlmInput
+        id="pq-descripcion"
+        class="w-full"
+        [ngModel]="descripcion()"
+        (ngModelChange)="descripcion.set($event)"
+        placeholder="Bundle de módulos para restaurante"
+      />
+    </div>
+    <div class="col-span-full flex gap-2">
+      <button hlmBtn size="sm" [disabled]="saving()" (click)="crear()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
+      <button hlmBtn variant="ghost" size="sm" (click)="showForm.set(false)">Cancelar</button>
+    </div>
+  </div>
+}
+
+<div hlmTableContainer>
+  <table hlmTable>
+    <thead hlmTHead>
+      <tr hlmTr>
+        <th hlmTh>Paquete</th>
+        <th hlmTh>Slug</th>
+        <th hlmTh>Módulos</th>
+        <th hlmTh>Estado</th>
+        <th hlmTh></th>
+      </tr>
+    </thead>
+    <tbody hlmTBody>
+      @for (paquete of paquetesResource.value(); track paquete.idPaquete) {
+        <tr hlmTr>
+          <td hlmTd>
+            <div>
+              <p class="font-medium">{{ paquete.nombre }}</p>
+              @if (paquete.descripcion) {
+                <p class="text-xs text-muted-foreground">{{ paquete.descripcion }}</p>
+              }
+            </div>
+          </td>
+          <td hlmTd class="font-mono text-xs text-muted-foreground">{{ paquete.slug }}</td>
+          <td hlmTd>
+            <div class="flex flex-wrap gap-1">
+              @for (mod of paquete.modulos; track mod.idModulo) {
+                <span class="rounded-full bg-moldhea-100 px-2 py-0.5 text-xs font-medium text-moldhea-800">
+                  {{ mod.slug }}
+                </span>
+              } @empty {
+                <span class="text-xs text-muted-foreground">Sin módulos</span>
+              }
+            </div>
+          </td>
+          <td hlmTd>
+            <span hlmBadge [variant]="paquete.isActive ? 'default' : 'outline'">{{
+              paquete.isActive ? 'Activo' : 'Inactivo'
+            }}</span>
+          </td>
+          <td hlmTd class="text-right">
+            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(paquete.idPaquete, !paquete.isActive)">
+              {{ paquete.isActive ? 'Desactivar' : 'Activar' }}
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr hlmTr>
+          <td hlmTd colspan="5" class="py-8 text-center text-muted-foreground">
+            {{ paquetesResource.isLoading() ? 'Cargando…' : 'Sin paquetes registrados.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

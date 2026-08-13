@@ -1,9 +1,26 @@
+export const CATEGORIAS_MODULO = [
+  'CORE',
+  'OPERACIONES',
+  'VENTAS',
+  'FINANZAS',
+  'INTELIGENCIA',
+  'WEB',
+  'GIRO_ESPECIFICO',
+] as const;
+export type CategoriaModulo = (typeof CATEGORIAS_MODULO)[number];
+
 export interface Modulo {
-  id: number;
+  idModulo: number;
   idProducto: number;
   slug: string;
   nombre: string;
   esCore: boolean;
+  descripcion: string | null;
+  icono: string | null;
+  orden: number | null;
+  categoria: CategoriaModulo | null;
+  precioMensualBase: number | null;
+  esAddon: boolean;
   isActive: boolean;
 }
 
@@ -12,7 +29,22 @@ export interface ModuloRequest {
   slug: string;
   nombre: string;
   esCore?: boolean;
+  descripcion?: string;
+  icono?: string;
+  orden?: number;
+  categoria?: CategoriaModulo;
   isActive?: boolean;
+}
+
+export interface ModuloAdminRequest {
+  nombre?: string;
+  descripcion?: string;
+  categoria?: string;
+  icono?: string;
+  precioMensualBase?: number | null;
+  esAddon?: boolean;
+  isActive?: boolean;
+  orden?: number;
 }
 
 export interface ModuloDependencia {

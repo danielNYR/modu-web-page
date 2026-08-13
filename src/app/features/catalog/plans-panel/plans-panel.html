@@ -5,8 +5,8 @@
     (ngModelChange)="filterProducto.set($event)"
   >
     <option [ngValue]="undefined">Todos los productos</option>
-    @for (producto of productosResource.value(); track producto.id) {
-      <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+    @for (producto of productosResource.value(); track producto.idProducto) {
+      <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
     }
   </select>
 
@@ -31,8 +31,8 @@
         (ngModelChange)="formProducto.set($event)"
       >
         <option [ngValue]="undefined">Selecciona…</option>
-        @for (producto of productosResource.value(); track producto.id) {
-          <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+        @for (producto of productosResource.value(); track producto.idProducto) {
+          <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
         }
       </select>
     </div>
@@ -96,7 +96,7 @@
       </tr>
     </thead>
     <tbody hlmTBody>
-      @for (plan of planesResource.value(); track plan.id) {
+      @for (plan of planesResource.value(); track plan.idPlan) {
         <tr hlmTr>
           <td hlmTd class="font-medium">{{ plan.nombre }}</td>
           <td hlmTd>{{ productoNombre(plan.idProducto) }}</td>
@@ -109,8 +109,8 @@
             }}</span>
           </td>
           <td hlmTd class="text-right whitespace-nowrap">
-            <button hlmBtn variant="ghost" size="sm" (click)="gestionarModulos(plan.id)">Módulos</button>
-            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(plan.id, !plan.isActive)">
+            <button hlmBtn variant="ghost" size="sm" (click)="gestionarModulos(plan.idPlan)">Módulos</button>
+            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(plan.idPlan, !plan.isActive)">
               {{ plan.isActive ? 'Desactivar' : 'Activar' }}
             </button>
           </td>

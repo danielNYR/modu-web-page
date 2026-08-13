@@ -51,6 +51,7 @@
           <thead hlmTHead>
             <tr hlmTr>
               <th hlmTh>Tenant</th>
+              <th hlmTh>Slug</th>
               <th hlmTh>Estatus</th>
               <th hlmTh>Alta</th>
               <th hlmTh></th>
@@ -60,6 +61,7 @@
             @for (tenant of tenantsResource.value().content; track tenant.idTenant) {
               <tr hlmTr>
                 <td hlmTd class="font-medium">{{ tenant.nombre }}</td>
+                <td hlmTd class="font-mono text-xs text-muted-foreground">{{ tenant.slug ?? '—' }}</td>
                 <td hlmTd>
                   <span hlmBadge [variant]="estatusVariant(tenant.estatus)" class="capitalize">{{
                     tenant.estatus.toLowerCase()
@@ -74,7 +76,7 @@
               </tr>
             } @empty {
               <tr hlmTr>
-                <td hlmTd colspan="4" class="py-8 text-center text-muted-foreground">
+                <td hlmTd colspan="5" class="py-8 text-center text-muted-foreground">
                   {{ tenantsResource.isLoading() ? 'Cargando tenants…' : 'No se encontraron tenants.' }}
                 </td>
               </tr>

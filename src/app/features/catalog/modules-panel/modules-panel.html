@@ -5,8 +5,8 @@
     (ngModelChange)="filterProducto.set($event)"
   >
     <option [ngValue]="undefined">Todos los productos</option>
-    @for (producto of productosResource.value(); track producto.id) {
-      <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+    @for (producto of productosResource.value(); track producto.idProducto) {
+      <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
     }
   </select>
 
@@ -51,16 +51,26 @@
       <tr hlmTr>
         <th hlmTh>Módulo</th>
         <th hlmTh>Slug</th>
+        <th hlmTh>Categoría</th>
+        <th hlmTh>Precio/mes</th>
         <th hlmTh>Core</th>
         <th hlmTh>Estado</th>
         <th hlmTh></th>
       </tr>
     </thead>
     <tbody hlmTBody>
-      @for (modulo of modulosResource.value(); track modulo.id) {
-        <tr hlmTr>
+      @for (modulo of modulosResource.value(); track modulo.idModulo) {
+        <tr hlmTr [class.bg-muted/30]="editingModulo()?.idModulo === modulo.idModulo">
           <td hlmTd class="font-medium">{{ modulo.nombre }}</td>
           <td hlmTd class="font-mono text-xs text-muted-foreground">{{ modulo.slug }}</td>
+          <td hlmTd class="text-xs text-muted-foreground">{{ modulo.categoria ?? '—' }}</td>
+          <td hlmTd class="tabular-nums text-sm">
+            @if (modulo.precioMensualBase != null) {
+              ${{ modulo.precioMensualBase | number: '1.2-2' }}
+            } @else {
+              <span class="text-muted-foreground">—</span>
+            }
+          </td>
           <td hlmTd>{{ modulo.esCore ? 'Sí' : 'No' }}</td>
           <td hlmTd>
             <span hlmBadge [variant]="modulo.isActive ? 'default' : 'outline'">{{
@@ -68,15 +78,16 @@
             }}</span>
           </td>
           <td hlmTd class="text-right whitespace-nowrap">
-            <button hlmBtn variant="ghost" size="sm" (click)="gestionarDependencias(modulo.id)">Dependencias</button>
-            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(modulo.id, !modulo.isActive)">
+            <button hlmBtn variant="ghost" size="sm" (click)="abrirEdicion(modulo)">Editar</button>
+            <button hlmBtn variant="ghost" size="sm" (click)="gestionarDependencias(modulo.idModulo)">Deps</button>
+            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(modulo.idModulo, !modulo.isActive)">
               {{ modulo.isActive ? 'Desactivar' : 'Activar' }}
             </button>
           </td>
         </tr>
       } @empty {
         <tr hlmTr>
-          <td hlmTd colspan="5" class="py-8 text-center text-muted-foreground">
+          <td hlmTd colspan="7" class="py-8 text-center text-muted-foreground">
             {{ modulosResource.isLoading() ? 'Cargando…' : 'Sin módulos registrados.' }}
           </td>
         </tr>
@@ -84,6 +95,108 @@
     </tbody>
   </table>
 </div>
+
+@if (editingModulo()) {
+  <div class="border-t border-border bg-muted/20 p-4">
+    <div class="mb-3 flex items-center justify-between">
+      <p class="text-sm font-medium text-foreground">Editar — {{ editingModulo()!.nombre }}</p>
+      <button hlmBtn variant="ghost" size="sm" (click)="cerrarEdicion()">Cerrar</button>
+    </div>
+
+    @if (editError()) {
+      <p class="mb-3 text-sm text-destructive">{{ editError() }}</p>
+    }
+
+    <div class="flex flex-wrap gap-3">
+      <div class="space-y-1.5">
+        <label hlmLabel for="e-nombre">Nombre</label>
+        <input hlmInput id="e-nombre" [ngModel]="editNombre()" (ngModelChange)="editNombre.set($event)" />
+      </div>
+
+      <div class="space-y-1.5">
+        <label hlmLabel for="e-categoria">Categoría</label>
+        <select
+          id="e-categoria"
+          class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          [ngModel]="editCategoria()"
+          (ngModelChange)="editCategoria.set($event)"
+        >
+          <option value="">Sin categoría</option>
+          @for (cat of CATEGORIAS; track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="space-y-1.5">
+        <label hlmLabel for="e-precio">Precio/mes (MXN)</label>
+        <input
+          hlmInput
+          id="e-precio"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+          class="w-32"
+          [ngModel]="editPrecio()"
+          (ngModelChange)="editPrecio.set($event)"
+        />
+      </div>
+
+      <div class="space-y-1.5">
+        <label hlmLabel for="e-orden">Orden</label>
+        <input
+          hlmInput
+          id="e-orden"
+          type="number"
+          min="0"
+          class="w-20"
+          [ngModel]="editOrden()"
+          (ngModelChange)="editOrden.set($event)"
+        />
+      </div>
+
+      <div class="space-y-1.5">
+        <label hlmLabel for="e-icono">Ícono</label>
+        <input
+          hlmInput
+          id="e-icono"
+          placeholder="shopping-bag"
+          [ngModel]="editIcono()"
+          (ngModelChange)="editIcono.set($event)"
+        />
+      </div>
+
+      <div class="space-y-1.5">
+        <label hlmLabel for="e-desc">Descripción</label>
+        <input
+          hlmInput
+          id="e-desc"
+          class="w-64"
+          [ngModel]="editDescripcion()"
+          (ngModelChange)="editDescripcion.set($event)"
+        />
+      </div>
+
+      <label class="flex items-end gap-2 pb-1 text-sm">
+        <input
+          type="checkbox"
+          class="size-4 rounded border-input accent-moldhea-600"
+          [ngModel]="editAddon()"
+          (ngModelChange)="editAddon.set($event)"
+        />
+        Add-on (pago extra)
+      </label>
+    </div>
+
+    <div class="mt-4 flex gap-2">
+      <button hlmBtn size="sm" [disabled]="editSaving()" (click)="guardarAdmin()">
+        {{ editSaving() ? 'Guardando…' : 'Guardar cambios' }}
+      </button>
+      <button hlmBtn variant="ghost" size="sm" (click)="cerrarEdicion()">Cancelar</button>
+    </div>
+  </div>
+}
 
 @if (managingModuloId()) {
   <div class="border-t border-border bg-muted/20 p-4">
@@ -127,8 +240,8 @@
             (ngModelChange)="nuevaDependenciaId.set($event)"
           >
             <option [ngValue]="undefined">Selecciona un módulo…</option>
-            @for (candidato of candidatosDependencia(); track candidato.id) {
-              <option [ngValue]="candidato.id">{{ candidato.nombre }}</option>
+            @for (candidato of candidatosDependencia(); track candidato.idModulo) {
+              <option [ngValue]="candidato.idModulo">{{ candidato.nombre }}</option>
             }
           </select>
         </div>

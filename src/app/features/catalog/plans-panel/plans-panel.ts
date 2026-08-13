@@ -49,7 +49,7 @@ export class PlansPanel {
   protected readonly planesResource = this.catalogService.planes(this.filterProducto);
 
   protected productoNombre(idProducto: number): string {
-    return this.productosResource.value().find((p) => p.id === idProducto)?.nombre ?? `#${idProducto}`;
+    return this.productosResource.value().find((p) => p.idProducto === idProducto)?.nombre ?? `#${idProducto}`;
   }
 
   // --- Crear plan ---------------------------------------------------------
@@ -110,7 +110,7 @@ export class PlansPanel {
   protected readonly moduleSaving = signal(false);
 
   private readonly managingIdProducto = computed(
-    () => this.planesResource.value().find((p) => p.id === this.managingPlanId())?.idProducto,
+    () => this.planesResource.value().find((p) => p.idPlan === this.managingPlanId())?.idProducto,
   );
   protected readonly modulosDelProducto = this.catalogService.modulos(this.managingIdProducto);
   protected readonly modulosDelPlan = this.catalogService.modulosDelPlan(this.managingPlanId);
@@ -128,9 +128,9 @@ export class PlansPanel {
       const asignadosMap = new Map(asignados.map((m) => [m.idModulo, m]));
       this.moduleEdits.set(
         catalogo.map((modulo) => {
-          const actual = asignadosMap.get(modulo.id);
+          const actual = asignadosMap.get(modulo.idModulo);
           return {
-            idModulo: modulo.id,
+            idModulo: modulo.idModulo,
             nombre: modulo.nombre,
             habilitado: actual?.habilitado ?? false,
             limiteUso: actual?.limiteUso ?? null,

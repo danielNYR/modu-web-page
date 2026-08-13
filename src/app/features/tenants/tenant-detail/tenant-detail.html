@@ -11,12 +11,56 @@
   <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-semibold tracking-tight text-foreground">{{ tenant.nombre }}</h1>
-      <p class="mt-1 text-sm text-muted-foreground">Tenant #{{ tenant.idTenant }}</p>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Tenant #{{ tenant.idTenant }}
+        @if (tenant.slug) { <span class="ml-2 font-mono text-xs">{{ tenant.slug }}</span> }
+      </p>
     </div>
     <span hlmBadge [variant]="tenantEstatusVariant[tenant.estatus]" class="capitalize">{{
       tenant.estatus.toLowerCase()
     }}</span>
   </div>
+
+  <div class="mb-6 flex flex-wrap gap-4 text-sm text-muted-foreground">
+    @if (tenant.pais) { <span>Pais: {{ tenant.pais }}</span> }
+    @if (tenant.trialFin) { <span>Trial hasta: {{ tenant.trialFin }}</span> }
+    <span>Creado: {{ tenant.creadoEn }}</span>
+  </div>
+
+  @if (entitlementsResource.value(); as ent) {
+    <div hlmCard class="mb-6">
+      <div hlmCardHeader>
+        <h3 hlmCardTitle>Modulos efectivos</h3>
+        <p hlmCardDescription>
+          @if (ent.planNombre) { Plan: {{ ent.planNombre }} ({{ ent.planSlug }}) }
+          @if (ent.licenciaEstado) {
+            <span hlmBadge [variant]="licenciaEstatusVariant[ent.licenciaEstado]" class="ml-2 capitalize">{{
+              ent.licenciaEstado.toLowerCase()
+            }}</span>
+          }
+          @if (ent.modoAcceso) {
+            <span hlmBadge [variant]="ent.modoAcceso === 'FULL' ? 'default' : ent.modoAcceso === 'READ_ONLY' ? 'secondary' : 'destructive'" class="ml-2">
+              {{ ent.modoAcceso === 'FULL' ? 'Acceso completo' : ent.modoAcceso === 'READ_ONLY' ? 'Solo lectura' : 'Bloqueado' }}
+            </span>
+          }
+          @if (ent.renovacion) { — Renovacion: {{ ent.renovacion }} }
+        </p>
+      </div>
+      <div hlmCardContent>
+        @if (ent.modulos.length > 0) {
+          <div class="flex flex-wrap gap-2">
+            @for (slug of ent.modulos; track slug) {
+              <span class="rounded-md bg-moldhea-50 px-2.5 py-1 text-xs font-medium text-moldhea-700 dark:bg-moldhea-950 dark:text-moldhea-300">
+                {{ slug }}
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="text-sm text-muted-foreground">Sin modulos habilitados. No hay licencia activa.</p>
+        }
+      </div>
+    </div>
+  }
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <div hlmCard>
@@ -31,17 +75,19 @@
               <tr hlmTr>
                 <th hlmTh>Nombre</th>
                 <th hlmTh>Correo</th>
+                <th hlmTh>Estatus</th>
               </tr>
             </thead>
             <tbody hlmTBody>
               @for (usuario of tenant.usuarios; track usuario.idUsuario) {
                 <tr hlmTr>
-                  <td hlmTd class="font-medium">{{ usuario.nombre }}</td>
+                  <td hlmTd class="font-medium">{{ usuario.nombre }} {{ usuario.apellido }}</td>
                   <td hlmTd class="text-muted-foreground">{{ usuario.email }}</td>
+                  <td hlmTd class="capitalize text-muted-foreground">{{ usuario.estatus?.toLowerCase() ?? '—' }}</td>
                 </tr>
               } @empty {
                 <tr hlmTr>
-                  <td hlmTd colspan="2" class="py-6 text-center text-muted-foreground">
+                  <td hlmTd colspan="3" class="py-6 text-center text-muted-foreground">
                     Sin usuarios registrados.
                   </td>
                 </tr>

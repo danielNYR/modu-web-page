@@ -36,7 +36,7 @@
       </tr>
     </thead>
     <tbody hlmTBody>
-      @for (producto of productosResource.value(); track producto.id) {
+      @for (producto of productosResource.value(); track producto.idProducto) {
         <tr hlmTr>
           <td hlmTd class="font-medium">{{ producto.nombre }}</td>
           <td hlmTd class="font-mono text-xs text-muted-foreground">{{ producto.slug }}</td>
@@ -50,7 +50,7 @@
               hlmBtn
               variant="ghost"
               size="sm"
-              (click)="cambiarEstado(producto.id, !producto.isActive)"
+              (click)="cambiarEstado(producto.idProducto, !producto.isActive)"
             >
               {{ producto.isActive ? 'Desactivar' : 'Activar' }}
             </button>

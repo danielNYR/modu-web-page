@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -10,11 +11,13 @@ import { HlmLabel } from '@spartan-ng/helm/label';
 import { HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTable, HlmTr } from '@spartan-ng/helm/table';
 import { extractErrorMessage } from '@app/core/http/error-message';
 import { CatalogService } from '@app/features/catalog/data/catalog.service';
-import type { ModuloDependencia, ModuloRequest } from '@app/features/catalog/models/modulo.model';
+import { CATEGORIAS_MODULO } from '@app/features/catalog/models/modulo.model';
+import type { Modulo, ModuloAdminRequest, ModuloDependencia, ModuloRequest } from '@app/features/catalog/models/modulo.model';
 
 @Component({
   selector: 'moldhea-modules-panel',
   imports: [
+    DecimalPipe,
     FormsModule,
     NgIcon,
     HlmBadge,
@@ -84,6 +87,67 @@ export class ModulesPanel {
     });
   }
 
+  // --- Edición de campos de negocio (precio, categoría, addon) ----------------
+
+  protected readonly CATEGORIAS = CATEGORIAS_MODULO;
+  protected readonly editingModulo = signal<Modulo | undefined>(undefined);
+  protected readonly editNombre = signal('');
+  protected readonly editDescripcion = signal('');
+  protected readonly editCategoria = signal('');
+  protected readonly editIcono = signal('');
+  protected readonly editPrecio = signal<number | null>(null);
+  protected readonly editAddon = signal(false);
+  protected readonly editOrden = signal(0);
+  protected readonly editSaving = signal(false);
+  protected readonly editError = signal<string | null>(null);
+
+  abrirEdicion(modulo: Modulo): void {
+    this.cerrarDependencias();
+    this.editingModulo.set(modulo);
+    this.editNombre.set(modulo.nombre);
+    this.editDescripcion.set(modulo.descripcion ?? '');
+    this.editCategoria.set(modulo.categoria ?? '');
+    this.editIcono.set(modulo.icono ?? '');
+    this.editPrecio.set(modulo.precioMensualBase);
+    this.editAddon.set(modulo.esAddon ?? false);
+    this.editOrden.set(modulo.orden ?? 0);
+    this.editError.set(null);
+  }
+
+  cerrarEdicion(): void {
+    this.editingModulo.set(undefined);
+    this.editError.set(null);
+  }
+
+  guardarAdmin(): void {
+    const m = this.editingModulo();
+    if (!m) return;
+
+    const req: ModuloAdminRequest = {
+      nombre: this.editNombre().trim() || undefined,
+      descripcion: this.editDescripcion().trim() || undefined,
+      categoria: this.editCategoria() || undefined,
+      icono: this.editIcono().trim() || undefined,
+      precioMensualBase: this.editPrecio(),
+      esAddon: this.editAddon(),
+      orden: this.editOrden(),
+    };
+
+    this.editSaving.set(true);
+    this.editError.set(null);
+    this.catalogService.actualizarModuloAdmin(m.slug, req).subscribe({
+      next: () => {
+        this.editSaving.set(false);
+        this.cerrarEdicion();
+        this.modulosResource.reload();
+      },
+      error: (err) => {
+        this.editSaving.set(false);
+        this.editError.set(extractErrorMessage(err, 'No se pudo actualizar el módulo.'));
+      },
+    });
+  }
+
   // --- Dependencias ----------------------------------------------------------
 
   protected readonly managingModuloId = signal<number | undefined>(undefined);
@@ -100,10 +164,11 @@ export class ModulesPanel {
   );
 
   protected readonly candidatosDependencia = computed(() =>
-    this.modulosResource.value().filter((m) => m.id !== this.managingModuloId()),
+    this.modulosResource.value().filter((m) => m.idModulo !== this.managingModuloId()),
   );
 
   gestionarDependencias(idModulo: number): void {
+    this.cerrarEdicion();
     this.managingModuloId.set(idModulo);
   }
 
@@ -113,7 +178,7 @@ export class ModulesPanel {
   }
 
   nombreModulo(id: number): string {
-    return this.modulosResource.value().find((m) => m.id === id)?.nombre ?? `#${id}`;
+    return this.modulosResource.value().find((m) => m.idModulo === id)?.nombre ?? `#${id}`;
   }
 
   agregarDependencia(): void {

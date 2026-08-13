@@ -1,0 +1,150 @@
+<moldhea-page-header
+  title="Cuentas de usuario"
+  subtitle="Busca y gestiona cuentas del registro de Moldhea Accounts"
+/>
+
+<div hlmCard>
+  <!-- Filtros de estatus -->
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+    <div class="flex flex-wrap items-center gap-2">
+      @for (f of estatusFilters; track f.value) {
+        <button
+          type="button"
+          (click)="setEstatus(f.value)"
+          class="rounded-full px-3 py-1 text-sm font-medium whitespace-nowrap transition-colors"
+          [class]="
+            activeEstatus() === f.value
+              ? 'bg-moldhea-600 text-white'
+              : 'bg-muted text-muted-foreground hover:bg-muted/70'
+          "
+        >
+          {{ f.label }}
+        </button>
+      }
+    </div>
+
+    <label
+      class="flex w-full max-w-xs items-center gap-2 rounded-md border border-input px-3 py-1.5 text-sm text-muted-foreground focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50"
+    >
+      <ng-icon name="lucideSearch" size="16" />
+      <input
+        type="search"
+        placeholder="Email, nombre o teléfono…"
+        class="w-full bg-transparent outline-none placeholder:text-muted-foreground"
+        [ngModel]="search()"
+        (ngModelChange)="onSearch($event)"
+      />
+    </label>
+  </div>
+
+  <!-- Filtros de fase del wizard -->
+  <div class="flex flex-wrap gap-2 border-b border-border bg-muted/20 px-4 py-2">
+    @for (f of faseFilters; track f.value) {
+      <button
+        type="button"
+        (click)="setFase(f.value)"
+        class="rounded px-2.5 py-0.5 text-xs font-medium transition-colors"
+        [class]="
+          activeFase() === f.value
+            ? 'bg-foreground text-background'
+            : 'bg-muted text-muted-foreground hover:bg-muted/70'
+        "
+      >
+        {{ f.label }}
+      </button>
+    }
+  </div>
+
+  <div hlmCardContent>
+    @if (cuentasResource.error()) {
+      <p class="py-8 text-center text-sm text-destructive">
+        No se pudo cargar las cuentas. Verifica la conexión con el backend.
+      </p>
+    } @else {
+      <div hlmTableContainer>
+        <table hlmTable>
+          <thead hlmTHead>
+            <tr hlmTr>
+              <th hlmTh>Usuario</th>
+              <th hlmTh>Estatus</th>
+              <th hlmTh>Verificación</th>
+              <th hlmTh>Fase del registro</th>
+              <th hlmTh>Último acceso</th>
+              <th hlmTh></th>
+            </tr>
+          </thead>
+          <tbody hlmTBody>
+            @for (cuenta of cuentasResource.value().content; track cuenta.idUsuario) {
+              <tr hlmTr>
+                <td hlmTd>
+                  <div class="flex flex-col">
+                    <span class="font-medium">
+                      {{ cuenta.nombre ?? '' }} {{ cuenta.apellido ?? '' }}
+                      @if (!cuenta.nombre && !cuenta.apellido) {
+                        <span class="text-muted-foreground">Sin nombre</span>
+                      }
+                    </span>
+                    <span class="text-xs text-muted-foreground">{{ cuenta.email }}</span>
+                  </div>
+                </td>
+                <td hlmTd>
+                  <span hlmBadge [variant]="$any(estatusVariant[cuenta.estatus])">
+                    {{ cuenta.estatus.toLowerCase() }}
+                  </span>
+                </td>
+                <td hlmTd>
+                  <div class="flex items-center gap-1.5">
+                    <span
+                      class="inline-block h-2 w-2 rounded-full"
+                      [class]="cuenta.emailConfirmado ? 'bg-green-500' : 'bg-red-400'"
+                      title="Email {{ cuenta.emailConfirmado ? 'verificado' : 'sin verificar' }}"
+                    ></span>
+                    <span class="text-xs text-muted-foreground">email</span>
+                    @if (cuenta.verifiedMethod) {
+                      <span class="ml-1 rounded bg-muted px-1 py-0.5 text-xs text-muted-foreground">
+                        {{ cuenta.verifiedMethod }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td hlmTd>
+                  <span class="text-sm">{{ phaseLabel(cuenta.registryPhase) }}</span>
+                </td>
+                <td hlmTd class="text-xs text-muted-foreground">
+                  {{ cuenta.ultimoAcceso ? (cuenta.ultimoAcceso | date: 'dd/MM/yy HH:mm') : '—' }}
+                </td>
+                <td hlmTd class="text-right">
+                  <a
+                    [routerLink]="['/cuentas', cuenta.idUsuario]"
+                    class="text-sm font-medium text-moldhea-600 hover:underline"
+                  >
+                    Ver detalle
+                  </a>
+                </td>
+              </tr>
+            } @empty {
+              <tr hlmTr>
+                <td hlmTd colspan="6" class="py-8 text-center text-muted-foreground">
+                  {{
+                    cuentasResource.isLoading()
+                      ? 'Cargando cuentas…'
+                      : 'No se encontraron cuentas con esos filtros.'
+                  }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <moldhea-pagination
+    [page]="cuentasResource.value().number"
+    [totalPages]="cuentasResource.value().totalPages"
+    [totalElements]="cuentasResource.value().totalElements"
+    [first]="cuentasResource.value().first"
+    [last]="cuentasResource.value().last"
+    (pageChange)="page.set($event)"
+  />
+</div>

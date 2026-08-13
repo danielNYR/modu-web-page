@@ -70,8 +70,8 @@
           (ngModelChange)="onProductoChange($event)"
         >
           <option [ngValue]="undefined">Selecciona un producto…</option>
-          @for (producto of productosResource.value(); track producto.id) {
-            <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+          @for (producto of productosResource.value(); track producto.idProducto) {
+            <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
           }
         </select>
       </div>
@@ -86,8 +86,8 @@
           [disabled]="!idProducto()"
         >
           <option [ngValue]="undefined">Selecciona un plan…</option>
-          @for (plan of planesResource.value(); track plan.id) {
-            <option [ngValue]="plan.id">{{ plan.nombre }}</option>
+          @for (plan of planesResource.value(); track plan.idPlan) {
+            <option [ngValue]="plan.idPlan">{{ plan.nombre }}</option>
           }
         </select>
       </div>

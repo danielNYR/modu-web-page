@@ -1,5 +1,5 @@
 export interface Producto {
-  id: number;
+  idProducto: number;
   slug: string;
   nombre: string;
   isActive: boolean;

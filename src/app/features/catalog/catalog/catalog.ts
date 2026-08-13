@@ -5,6 +5,7 @@ import { PageHeader } from '@app/shared/components/page-header/page-header';
 import { ProductsPanel } from '@app/features/catalog/products-panel/products-panel';
 import { PlansPanel } from '@app/features/catalog/plans-panel/plans-panel';
 import { ModulesPanel } from '@app/features/catalog/modules-panel/modules-panel';
+import { PackagesPanel } from '@app/features/catalog/packages-panel/packages-panel';
 
 @Component({
   selector: 'moldhea-catalog',
@@ -18,6 +19,7 @@ import { ModulesPanel } from '@app/features/catalog/modules-panel/modules-panel'
     ProductsPanel,
     PlansPanel,
     ModulesPanel,
+    PackagesPanel,
   ],
   templateUrl: './catalog.html',
   styleUrl: './catalog.css',

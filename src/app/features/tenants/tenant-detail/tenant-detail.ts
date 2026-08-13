@@ -37,6 +37,7 @@ export class TenantDetail {
   });
 
   protected readonly tenantResource = this.tenantsService.detail(this.idTenantNum);
+  protected readonly entitlementsResource = this.tenantsService.entitlements(this.idTenantNum);
 
   protected tenantEstatusVariant = ESTATUS_TENANT_VARIANT;
   protected licenciaEstatusVariant = ESTATUS_SUSCRIPCION_VARIANT;

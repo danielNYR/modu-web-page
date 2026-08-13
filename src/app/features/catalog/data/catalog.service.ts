@@ -4,11 +4,13 @@ import type { Producto, ProductoRequest } from '../models/producto.model';
 import type { Plan, PlanModulo, PlanModuloRequest, PlanRequest } from '../models/plan.model';
 import type {
   Modulo,
+  ModuloAdminRequest,
   ModuloConDependencias,
   ModuloDependencia,
   ModuloDependenciaRequest,
   ModuloRequest,
 } from '../models/modulo.model';
+import type { Paquete, PaqueteRequest } from '../models/paquete.model';
 
 const BASE = '/api/admin/catalogo';
 
@@ -96,6 +98,10 @@ export class CatalogService {
     return this.http.patch<Modulo>(`${BASE}/modulos/${id}/estado`, { isActive });
   }
 
+  actualizarModuloAdmin(slug: string, req: ModuloAdminRequest) {
+    return this.http.put<Modulo>(`/api/admin/modulos/${slug}`, req);
+  }
+
   modulosConDependencias(idProducto: Signal<number | undefined>) {
     return httpResource<ModuloConDependencias[]>(
       () => {
@@ -116,5 +122,37 @@ export class CatalogService {
 
   eliminarDependencia(id: number, idModuloReq: number) {
     return this.http.delete<void>(`${BASE}/modulos/${id}/dependencias/${idModuloReq}`);
+  }
+
+  // --- Paquetes ---------------------------------------------------------------
+
+  paquetes(idProducto: Signal<number | undefined>) {
+    return httpResource<Paquete[]>(
+      () => {
+        const id = idProducto();
+        return { url: `${BASE}/paquetes`, params: id === undefined ? undefined : { idProducto: id } };
+      },
+      { defaultValue: [] },
+    );
+  }
+
+  crearPaquete(req: PaqueteRequest) {
+    return this.http.post<Paquete>(`${BASE}/paquetes`, req);
+  }
+
+  actualizarPaquete(id: number, req: PaqueteRequest) {
+    return this.http.put<Paquete>(`${BASE}/paquetes/${id}`, req);
+  }
+
+  cambiarEstadoPaquete(id: number, isActive: boolean) {
+    return this.http.patch<Paquete>(`${BASE}/paquetes/${id}/estado`, { isActive });
+  }
+
+  agregarModuloAPaquete(idPaquete: number, idModulo: number) {
+    return this.http.post<Paquete>(`${BASE}/paquetes/${idPaquete}/modulos/${idModulo}`, {});
+  }
+
+  eliminarModuloDePaquete(idPaquete: number, idModulo: number) {
+    return this.http.delete<void>(`${BASE}/paquetes/${idPaquete}/modulos/${idModulo}`);
   }
 }

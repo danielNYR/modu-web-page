@@ -30,8 +30,8 @@
       (ngModelChange)="onProductoChange($event)"
     >
       <option [ngValue]="undefined">Todos los productos</option>
-      @for (producto of productosResource.value(); track producto.id) {
-        <option [ngValue]="producto.id">{{ producto.nombre }}</option>
+      @for (producto of productosResource.value(); track producto.idProducto) {
+        <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
       }
     </select>
 

@@ -8,6 +8,7 @@ import {
   lucideLayoutDashboard,
   lucideLogOut,
   lucideScrollText,
+  lucideUserCheck,
   lucideUsers,
 } from '@ng-icons/lucide';
 import { NAV_ITEMS } from '@app/core/nav/nav-items';
@@ -19,6 +20,7 @@ import { NAV_ITEMS } from '@app/core/nav/nav-items';
     provideIcons({
       lucideLayoutDashboard,
       lucideUsers,
+      lucideUserCheck,
       lucideKeyRound,
       lucideBoxes,
       lucideBell,

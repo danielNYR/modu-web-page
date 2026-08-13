@@ -1,5 +1,5 @@
 export interface Plan {
-  id: number;
+  idPlan: number;
   idProducto: number;
   slug: string;
   nombre: string;

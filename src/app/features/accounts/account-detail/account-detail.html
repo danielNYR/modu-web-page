@@ -1,0 +1,357 @@
+<div class="mb-6">
+  <a routerLink="/cuentas" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+    <ng-icon name="lucideArrowLeft" size="14" />
+    Volver a Cuentas
+  </a>
+</div>
+
+@if (cuentaResource.isLoading()) {
+  <p class="text-center text-sm text-muted-foreground py-12">Cargando cuenta…</p>
+} @else if (cuentaResource.error()) {
+  <p class="text-center text-sm text-destructive py-12">No se pudo cargar la cuenta.</p>
+} @else if (cuentaResource.value(); as cuenta) {
+
+  <!-- Header -->
+  <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-semibold">
+          {{ cuenta.nombre ?? '' }} {{ cuenta.apellido ?? '' }}
+          @if (!cuenta.nombre && !cuenta.apellido) {
+            <span class="text-muted-foreground">Sin nombre registrado</span>
+          }
+        </h1>
+        <span hlmBadge [variant]="$any(estatusVariant[cuenta.estatus])">{{ cuenta.estatus }}</span>
+      </div>
+      <p class="mt-0.5 text-sm text-muted-foreground">{{ cuenta.email }}</p>
+      @if (cuenta.phone) {
+        <p class="text-xs text-muted-foreground">{{ cuenta.phone }}</p>
+      }
+      @if (cuenta.suspensionRazon) {
+        <p class="mt-1 flex items-center gap-1 text-xs text-destructive">
+          <ng-icon name="lucideAlertTriangle" size="12" />
+          Motivo de suspensión: {{ cuenta.suspensionRazon }}
+        </p>
+      }
+    </div>
+
+    <!-- Acciones admin -->
+    <div class="flex flex-wrap gap-2">
+      @if (!cuenta.emailConfirmado) {
+        <button
+          type="button"
+          (click)="verificarEmail()"
+          [disabled]="actionPending()"
+          class="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+        >
+          Verificar email (admin)
+        </button>
+      }
+      @if (cuenta.estatus === 'ACTIVO') {
+        <button
+          type="button"
+          (click)="suspender()"
+          [disabled]="actionPending()"
+          class="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/20 disabled:opacity-50"
+        >
+          Suspender cuenta
+        </button>
+      }
+      @if (cuenta.estatus === 'SUSPENDIDO') {
+        <button
+          type="button"
+          (click)="reactivar()"
+          [disabled]="actionPending()"
+          class="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+        >
+          Reactivar cuenta
+        </button>
+      }
+      <button
+        type="button"
+        (click)="revocarSesiones()"
+        [disabled]="actionPending()"
+        class="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+      >
+        Revocar sesiones
+      </button>
+    </div>
+  </div>
+
+  @if (actionMsg()) {
+    <div class="mb-4 rounded-md border border-border bg-muted/50 px-4 py-2 text-sm">
+      {{ actionMsg() }}
+    </div>
+  }
+
+  <div class="grid gap-4 lg:grid-cols-3">
+
+    <!-- Col 1-2: Progreso del wizard + verificación + seguridad -->
+    <div class="space-y-4 lg:col-span-2">
+
+      <!-- Progreso del wizard -->
+      <div hlmCard>
+        <div hlmCardHeader>
+          <h2 class="text-sm font-semibold">Progreso del registro</h2>
+          <p class="text-xs text-muted-foreground">{{ cuenta.wizardDescripcion }}</p>
+        </div>
+        <div hlmCardContent>
+          <div class="flex items-center gap-1">
+            @for (wp of wizardPhases; track wp.phase) {
+              @if (wp.phase !== 'GOOGLE_CREATED') {
+                <div class="flex flex-1 flex-col items-center gap-1">
+                  <div
+                    class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold"
+                    [class]="
+                      cuenta.wizardStep >= wp.step
+                        ? 'bg-moldhea-600 text-white'
+                        : 'bg-muted text-muted-foreground'
+                    "
+                  >
+                    @if (cuenta.wizardStep > wp.step) {
+                      <ng-icon name="lucideCheck" size="12" />
+                    } @else {
+                      {{ wp.step }}
+                    }
+                  </div>
+                  <span class="text-center text-[10px] text-muted-foreground leading-tight">
+                    {{ wp.label }}
+                  </span>
+                </div>
+                @if (wp.step < 7) {
+                  <div
+                    class="mb-3 h-px flex-1 max-w-6"
+                    [class]="cuenta.wizardStep > wp.step ? 'bg-moldhea-600' : 'bg-border'"
+                  ></div>
+                }
+              }
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Verificación + Seguridad -->
+      <div hlmCard>
+        <div hlmCardHeader>
+          <h2 class="text-sm font-semibold">Verificación y seguridad</h2>
+        </div>
+        <div hlmCardContent>
+          <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
+
+            <div>
+              <dt class="text-xs text-muted-foreground">Email verificado</dt>
+              <dd class="flex items-center gap-1 font-medium">
+                @if (cuenta.emailConfirmado) {
+                  <ng-icon name="lucideCheck" size="14" class="text-green-600" />
+                  Sí
+                } @else {
+                  <ng-icon name="lucideX" size="14" class="text-red-500" />
+                  No
+                }
+              </dd>
+              @if (cuenta.emailConfirmadoAt) {
+                <p class="text-[10px] text-muted-foreground">{{ cuenta.emailConfirmadoAt | date:'dd/MM/yy' }}</p>
+              }
+            </div>
+
+            <div>
+              <dt class="text-xs text-muted-foreground">Teléfono verificado</dt>
+              <dd class="flex items-center gap-1 font-medium">
+                @if (cuenta.phoneConfirmado) {
+                  <ng-icon name="lucideCheck" size="14" class="text-green-600" />
+                  Sí
+                } @else {
+                  <ng-icon name="lucideX" size="14" class="text-red-500" />
+                  No
+                }
+              </dd>
+            </div>
+
+            <div>
+              <dt class="text-xs text-muted-foreground">Método de verificación</dt>
+              <dd class="font-medium">{{ cuenta.verifiedMethod ?? '—' }}</dd>
+            </div>
+
+            <div>
+              <dt class="text-xs text-muted-foreground">Contraseña</dt>
+              <dd class="flex items-center gap-1 font-medium">
+                @if (cuenta.hasPassword) {
+                  <ng-icon name="lucideShieldCheck" size="14" class="text-green-600" />
+                  Configurada
+                } @else {
+                  <ng-icon name="lucideShieldOff" size="14" class="text-muted-foreground" />
+                  Sin contraseña
+                }
+              </dd>
+              @if (cuenta.passwordSetAt) {
+                <p class="text-[10px] text-muted-foreground">{{ cuenta.passwordSetAt | date:'dd/MM/yy' }}</p>
+              }
+            </div>
+
+            <div>
+              <dt class="text-xs text-muted-foreground">MFA</dt>
+              <dd class="flex items-center gap-1 font-medium">
+                @if (cuenta.mfaEnabled) {
+                  <ng-icon name="lucideShieldCheck" size="14" class="text-green-600" />
+                  Habilitado
+                } @else {
+                  <ng-icon name="lucideShieldOff" size="14" class="text-muted-foreground" />
+                  No configurado
+                }
+              </dd>
+            </div>
+
+          </dl>
+        </div>
+      </div>
+
+      <!-- Sesiones recientes -->
+      <div hlmCard>
+        <div hlmCardHeader>
+          <h2 class="text-sm font-semibold">Sesiones recientes</h2>
+          <p class="text-xs text-muted-foreground">Últimas 10 sesiones — sin tokens de acceso</p>
+        </div>
+        <div hlmCardContent>
+          @if (cuenta.sesionesRecientes.length === 0) {
+            <p class="py-4 text-center text-sm text-muted-foreground">Sin sesiones registradas.</p>
+          } @else {
+            <div hlmTableContainer>
+              <table hlmTable>
+                <thead hlmTHead>
+                  <tr hlmTr>
+                    <th hlmTh>Dispositivo</th>
+                    <th hlmTh>IP origen</th>
+                    <th hlmTh>Inicio</th>
+                    <th hlmTh>Vence</th>
+                    <th hlmTh>Estado</th>
+                  </tr>
+                </thead>
+                <tbody hlmTBody>
+                  @for (s of cuenta.sesionesRecientes; track s.idSesion) {
+                    <tr hlmTr>
+                      <td hlmTd>
+                        <div class="flex items-center gap-1.5">
+                          <ng-icon
+                            [name]="isMobile(s.userAgent) ? 'lucideSmartphone' : 'lucideMonitor'"
+                            size="14"
+                            class="shrink-0 text-muted-foreground"
+                          />
+                          <span class="text-xs">{{ s.deviceNombre ?? 'Desconocido' }}</span>
+                        </div>
+                      </td>
+                      <td hlmTd class="font-mono text-xs">{{ s.ipOrigen ?? '—' }}</td>
+                      <td hlmTd class="text-xs text-muted-foreground">
+                        {{ s.fechaCreacion | date:'dd/MM/yy HH:mm' }}
+                      </td>
+                      <td hlmTd class="text-xs text-muted-foreground">
+                        {{ s.fechaExpiracion | date:'dd/MM/yy HH:mm' }}
+                      </td>
+                      <td hlmTd>
+                        @if (s.revokedAt) {
+                          <span class="text-xs text-destructive">Revocada</span>
+                        } @else if (s.isActive) {
+                          <span class="text-xs font-medium text-green-600">Activa</span>
+                        } @else {
+                          <span class="text-xs text-muted-foreground">Expirada</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 3: Info lateral -->
+    <div class="space-y-4">
+
+      <!-- Vínculos -->
+      <div hlmCard>
+        <div hlmCardHeader>
+          <h2 class="text-sm font-semibold">Vínculos</h2>
+        </div>
+        <div hlmCardContent>
+          <dl class="space-y-3 text-sm">
+            <div>
+              <dt class="text-xs text-muted-foreground">Tenant</dt>
+              <dd class="font-medium">
+                @if (cuenta.idTenant) {
+                  <a
+                    [routerLink]="['/tenants', cuenta.idTenant]"
+                    class="text-moldhea-600 hover:underline"
+                  >
+                    #{{ cuenta.idTenant }}
+                  </a>
+                } @else {
+                  <span class="text-muted-foreground">No asignado</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Institución (app-DB)</dt>
+              <dd class="font-medium">
+                {{ cuenta.idInstitucionApp ?? '—' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Plan seleccionado</dt>
+              <dd class="font-medium">
+                {{ cuenta.idPlanSeleccionado ? '#' + cuenta.idPlanSeleccionado : '—' }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Fechas -->
+      <div hlmCard>
+        <div hlmCardHeader>
+          <h2 class="text-sm font-semibold">Actividad</h2>
+        </div>
+        <div hlmCardContent>
+          <dl class="space-y-3 text-sm">
+            <div>
+              <dt class="text-xs text-muted-foreground">Registrado</dt>
+              <dd>{{ cuenta.createdAt | date:'dd/MM/yyyy HH:mm' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Primer acceso</dt>
+              <dd>{{ (cuenta.primerAcceso | date:'dd/MM/yyyy HH:mm') ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Último acceso</dt>
+              <dd>{{ (cuenta.ultimoAcceso | date:'dd/MM/yyyy HH:mm') ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Actualizado</dt>
+              <dd>{{ (cuenta.updatedAt | date:'dd/MM/yyyy HH:mm') ?? '—' }}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- ULID técnico -->
+      <div hlmCard>
+        <div hlmCardHeader>
+          <h2 class="text-sm font-semibold">Identificadores</h2>
+        </div>
+        <div hlmCardContent>
+          <dl class="space-y-2 text-sm">
+            <div>
+              <dt class="text-xs text-muted-foreground">ID interno</dt>
+              <dd class="font-mono text-xs">{{ cuenta.idUsuario }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">ULID</dt>
+              <dd class="break-all font-mono text-xs text-muted-foreground">{{ cuenta.ulid ?? '—' }}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}

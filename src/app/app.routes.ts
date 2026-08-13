@@ -68,6 +68,18 @@ export const routes: Routes = [
           import('./features/audit/audit-list/audit-list').then((m) => m.AuditList),
         title: 'Auditoría · Moldhea Accounts',
       },
+      {
+        path: 'cuentas',
+        loadComponent: () =>
+          import('./features/accounts/accounts-list/accounts-list').then((m) => m.AccountsList),
+        title: 'Cuentas · Moldhea Accounts',
+      },
+      {
+        path: 'cuentas/:idUsuario',
+        loadComponent: () =>
+          import('./features/accounts/account-detail/account-detail').then((m) => m.AccountDetail),
+        title: 'Detalle de cuenta · Moldhea Accounts',
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

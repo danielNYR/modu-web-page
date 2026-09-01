@@ -8,9 +8,8 @@ export const ESTATUS_SUSCRIPCION: EstatusSuscripcion[] = [
   'SUSPENDIDA',
 ];
 
-export type Periodo = 'TRIAL' | 'MENSUAL' | 'ANUAL' | 'FOREVER';
-
-export const PERIODOS: Periodo[] = ['TRIAL', 'MENSUAL', 'ANUAL', 'FOREVER'];
+// Periodo dejó de ser un enum fijo — ahora es un catálogo administrable
+// (CatalogService.periodosLicencia(), ver features/catalog/periodos-licencia-panel).
 
 export type TipoDespliegue = 'CLOUD' | 'OFFLINE' | 'HYBRID';
 

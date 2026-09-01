@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,7 @@ import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmLabel } from '@spartan-ng/helm/label';
 import { HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTable, HlmTr } from '@spartan-ng/helm/table';
 import { extractErrorMessage } from '@app/core/http/error-message';
+import { Pagination } from '@app/shared/components/pagination/pagination';
 import { CatalogService } from '@app/features/catalog/data/catalog.service';
 import { CATEGORIAS_MODULO } from '@app/features/catalog/models/modulo.model';
 import type { Modulo, ModuloAdminRequest, ModuloDependencia, ModuloRequest } from '@app/features/catalog/models/modulo.model';
@@ -30,6 +31,7 @@ import type { Modulo, ModuloAdminRequest, ModuloDependencia, ModuloRequest } fro
     HlmTr,
     HlmTh,
     HlmTd,
+    Pagination,
   ],
   providers: [provideIcons({ lucidePlus, lucideTrash2 })],
   templateUrl: './modules-panel.html',
@@ -41,6 +43,23 @@ export class ModulesPanel {
   protected readonly filterProducto = signal<number | undefined>(undefined);
   protected readonly productosResource = this.catalogService.productos();
   protected readonly modulosResource = this.catalogService.modulos(this.filterProducto);
+  protected readonly page = signal(0);
+  protected readonly pageSize = 10;
+  protected readonly totalElements = computed(() => this.modulosResource.value().length);
+  protected readonly totalPages = computed(() => Math.ceil(this.totalElements() / this.pageSize));
+  protected readonly paginatedModulos = computed(() => {
+    const start = this.page() * this.pageSize;
+    return this.modulosResource.value().slice(start, start + this.pageSize);
+  });
+
+  protected cambiarProducto(idProducto: number | undefined): void {
+    this.filterProducto.set(idProducto);
+    this.page.set(0);
+  }
+
+  protected cambiarPagina(page: number): void {
+    this.page.set(Math.max(0, Math.min(page, Math.max(this.totalPages() - 1, 0))));
+  }
 
   // --- Crear módulo --------------------------------------------------------
 
@@ -103,6 +122,7 @@ export class ModulesPanel {
 
   abrirEdicion(modulo: Modulo): void {
     this.cerrarDependencias();
+    this.cerrarGiros();
     this.editingModulo.set(modulo);
     this.editNombre.set(modulo.nombre);
     this.editDescripcion.set(modulo.descripcion ?? '');
@@ -117,6 +137,11 @@ export class ModulesPanel {
   cerrarEdicion(): void {
     this.editingModulo.set(undefined);
     this.editError.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected cerrarModalConEscape(): void {
+    if (this.editingModulo() && !this.editSaving()) this.cerrarEdicion();
   }
 
   guardarAdmin(): void {
@@ -148,6 +173,67 @@ export class ModulesPanel {
     });
   }
 
+  // --- Giros del módulo -------------------------------------------------------
+
+  protected readonly managingGirosModuloId = signal<number | undefined>(undefined);
+  protected readonly giroEdits = signal<Set<number>>(new Set());
+  protected readonly giroSaving = signal(false);
+  protected readonly giroError = signal<string | null>(null);
+
+  protected readonly allGirosResource = this.catalogService.giros();
+  protected readonly girosDeModuloResource = this.catalogService.girosDeModulo(this.managingGirosModuloId);
+
+  constructor() {
+    effect(() => {
+      const idModulo = this.managingGirosModuloId();
+      const giros = this.girosDeModuloResource.value();
+      if (idModulo !== undefined) {
+        this.giroEdits.set(new Set(giros.map((g) => g.idGiro)));
+      }
+    });
+  }
+
+  protected nombreModuloGiro(id: number): string {
+    return this.modulosResource.value().find((m) => m.idModulo === id)?.nombre ?? `#${id}`;
+  }
+
+  gestionarGiros(idModulo: number): void {
+    this.cerrarEdicion();
+    this.cerrarDependencias();
+    this.managingGirosModuloId.set(idModulo);
+  }
+
+  cerrarGiros(): void {
+    this.managingGirosModuloId.set(undefined);
+    this.giroEdits.set(new Set());
+    this.giroError.set(null);
+  }
+
+  toggleGiro(idGiro: number, checked: boolean): void {
+    const next = new Set(this.giroEdits());
+    if (checked) next.add(idGiro);
+    else next.delete(idGiro);
+    this.giroEdits.set(next);
+  }
+
+  guardarGiros(): void {
+    const idModulo = this.managingGirosModuloId();
+    if (!idModulo) return;
+
+    this.giroSaving.set(true);
+    this.giroError.set(null);
+    this.catalogService.asignarGirosAModulo(idModulo, [...this.giroEdits()]).subscribe({
+      next: () => {
+        this.giroSaving.set(false);
+        this.girosDeModuloResource.reload();
+      },
+      error: (err) => {
+        this.giroSaving.set(false);
+        this.giroError.set(extractErrorMessage(err, 'No se pudieron guardar los giros.'));
+      },
+    });
+  }
+
   // --- Dependencias ----------------------------------------------------------
 
   protected readonly managingModuloId = signal<number | undefined>(undefined);
@@ -169,6 +255,7 @@ export class ModulesPanel {
 
   gestionarDependencias(idModulo: number): void {
     this.cerrarEdicion();
+    this.cerrarGiros();
     this.managingModuloId.set(idModulo);
   }
 

@@ -1,6 +1,6 @@
 <div class="flex items-center justify-between border-b border-border p-4">
   <p class="text-sm text-muted-foreground">{{ productosResource.value().length }} productos</p>
-  <button hlmBtn size="sm" (click)="showForm.set(!showForm())">
+  <button hlmBtn size="sm" (click)="abrirFormulario()">
     <ng-icon name="lucidePlus" size="16" />
     Nuevo producto
   </button>
@@ -11,17 +11,31 @@
 }
 
 @if (showForm()) {
-  <div class="flex flex-wrap items-end gap-3 border-b border-border bg-muted/30 p-4">
-    <div class="space-y-1.5">
-      <label hlmLabel for="p-slug">Slug</label>
-      <input hlmInput id="p-slug" [ngModel]="slug()" (ngModelChange)="slug.set($event)" placeholder="erp" />
-    </div>
-    <div class="space-y-1.5">
-      <label hlmLabel for="p-nombre">Nombre</label>
-      <input hlmInput id="p-nombre" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Moldhea ERP" />
-    </div>
-    <button hlmBtn size="sm" [disabled]="saving()" (click)="crear()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
-    <button hlmBtn variant="ghost" size="sm" (click)="showForm.set(false)">Cancelar</button>
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[1px]" (click)="cerrarFormulario()">
+    <section role="dialog" aria-modal="true" aria-labelledby="new-product-title"
+      class="w-full max-w-lg rounded-xl border border-border bg-background p-6 shadow-2xl" (click)="$event.stopPropagation()">
+      <div class="mb-5 border-b border-border pb-4">
+        <h2 id="new-product-title" class="text-lg font-semibold">Nuevo producto</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Crea la familia principal que agrupará planes, módulos y paquetes.</p>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="space-y-1.5">
+          <label hlmLabel for="p-slug">Slug</label>
+          <input hlmInput class="w-full" id="p-slug" [ngModel]="slug()" (ngModelChange)="slug.set($event)" placeholder="modular-core" />
+          <p class="text-xs text-muted-foreground">Identificador técnico; evita cambiarlo después.</p>
+        </div>
+        <div class="space-y-1.5">
+          <label hlmLabel for="p-nombre">Nombre</label>
+          <input hlmInput class="w-full" id="p-nombre" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Modular Core" />
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-2 border-t border-border pt-4">
+        <button hlmBtn variant="outline" size="sm" [disabled]="saving()" (click)="cerrarFormulario()">Cancelar</button>
+        <button hlmBtn size="sm" [disabled]="saving() || !slug().trim() || !nombre().trim()" (click)="crear()">
+          {{ saving() ? 'Guardando…' : 'Crear producto' }}
+        </button>
+      </div>
+    </section>
   </div>
 }
 
@@ -36,7 +50,7 @@
       </tr>
     </thead>
     <tbody hlmTBody>
-      @for (producto of productosResource.value(); track producto.idProducto) {
+      @for (producto of paginatedProductos(); track producto.idProducto) {
         <tr hlmTr>
           <td hlmTd class="font-medium">{{ producto.nombre }}</td>
           <td hlmTd class="font-mono text-xs text-muted-foreground">{{ producto.slug }}</td>
@@ -66,3 +80,6 @@
     </tbody>
   </table>
 </div>
+
+<moldhea-pagination [page]="page()" [totalPages]="totalPages()" [totalElements]="totalElements()"
+  [first]="page() === 0" [last]="page() >= totalPages() - 1" (pageChange)="cambiarPagina($event)" />

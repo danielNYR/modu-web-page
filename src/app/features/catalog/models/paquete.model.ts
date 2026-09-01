@@ -1,6 +1,7 @@
 export interface Paquete {
   idPaquete: number;
   idProducto: number;
+  idGiros: number[];
   slug: string;
   nombre: string;
   descripcion?: string;
@@ -21,6 +22,7 @@ export interface PaqueteModulo {
 
 export interface PaqueteRequest {
   idProducto: number;
+  idGiros?: number[];
   slug: string;
   nombre: string;
   descripcion?: string;

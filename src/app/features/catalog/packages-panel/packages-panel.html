@@ -2,7 +2,7 @@
   <select
     class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
     [ngModel]="filterProducto()"
-    (ngModelChange)="filterProducto.set($event)"
+    (ngModelChange)="cambiarProducto($event)"
   >
     <option [ngValue]="undefined">Todos los productos</option>
     @for (producto of productosResource.value(); track producto.idProducto) {
@@ -10,7 +10,7 @@
     }
   </select>
 
-  <button hlmBtn size="sm" (click)="showForm.set(!showForm())">
+  <button hlmBtn size="sm" (click)="abrirFormulario()">
     <ng-icon name="lucidePlus" size="16" />
     Nuevo paquete
   </button>
@@ -21,7 +21,15 @@
 }
 
 @if (showForm()) {
-  <div class="grid grid-cols-2 gap-3 border-b border-border bg-muted/30 p-4 sm:grid-cols-3">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[1px]" (click)="cerrarFormulario()">
+    <section role="dialog" aria-modal="true" aria-labelledby="new-package-title"
+      class="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-border bg-background p-6 shadow-2xl"
+      (click)="$event.stopPropagation()">
+      <div class="mb-5 border-b border-border pb-4">
+        <h2 id="new-package-title" class="text-lg font-semibold">Nuevo paquete</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Agrupa módulos relacionados para ofrecer una solución por giro o necesidad.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
     <div class="space-y-1.5">
       <label hlmLabel for="pq-producto">Producto</label>
       <select
@@ -45,6 +53,33 @@
       <input hlmInput id="pq-nombre" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Mesa Viva" />
     </div>
     <div class="col-span-full space-y-1.5">
+      <label hlmLabel>
+        Giros
+        <span class="ml-1 text-xs font-normal text-muted-foreground">(opcional, puedes marcar varios)</span>
+      </label>
+      @if (girosResource.value().length) {
+        <div class="flex flex-wrap gap-2 rounded-md border border-border bg-background p-2.5">
+          @for (giro of girosResource.value(); track giro.idGiro) {
+            <label
+              class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors"
+              [class]="formGiros().has(giro.idGiro) ? 'border-primary bg-primary/10' : 'border-border'"
+            >
+              <input
+                type="checkbox"
+                class="size-3.5 rounded border-input accent-primary"
+                [checked]="formGiros().has(giro.idGiro)"
+                (change)="toggleFormGiro(giro.idGiro)"
+              />
+              {{ giro.nombreGiro }}
+            </label>
+          }
+        </div>
+      } @else {
+        <p class="text-xs text-muted-foreground">No hay giros en el catálogo.</p>
+      }
+      <p class="text-xs text-muted-foreground">Deja todo sin marcar si el paquete aplica a cualquier giro</p>
+    </div>
+    <div class="col-span-full space-y-1.5">
       <label hlmLabel for="pq-descripcion">Descripción</label>
       <input
         hlmInput
@@ -55,10 +90,14 @@
         placeholder="Bundle de módulos para restaurante"
       />
     </div>
-    <div class="col-span-full flex gap-2">
-      <button hlmBtn size="sm" [disabled]="saving()" (click)="crear()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
-      <button hlmBtn variant="ghost" size="sm" (click)="showForm.set(false)">Cancelar</button>
-    </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-2 border-t border-border pt-4">
+        <button hlmBtn variant="outline" size="sm" [disabled]="saving()" (click)="cerrarFormulario()">Cancelar</button>
+        <button hlmBtn size="sm" [disabled]="saving() || !formProducto() || !slug().trim() || !nombre().trim()" (click)="crear()">
+          {{ saving() ? 'Guardando…' : 'Crear paquete' }}
+        </button>
+      </div>
+    </section>
   </div>
 }
 
@@ -68,13 +107,14 @@
       <tr hlmTr>
         <th hlmTh>Paquete</th>
         <th hlmTh>Slug</th>
+        <th hlmTh>Giros</th>
         <th hlmTh>Módulos</th>
         <th hlmTh>Estado</th>
         <th hlmTh></th>
       </tr>
     </thead>
     <tbody hlmTBody>
-      @for (paquete of paquetesResource.value(); track paquete.idPaquete) {
+      @for (paquete of paginatedPaquetes(); track paquete.idPaquete) {
         <tr hlmTr>
           <td hlmTd>
             <div>
@@ -85,6 +125,7 @@
             </div>
           </td>
           <td hlmTd class="font-mono text-xs text-muted-foreground">{{ paquete.slug }}</td>
+          <td hlmTd class="text-sm text-muted-foreground">{{ giroNombres(paquete.idGiros) }}</td>
           <td hlmTd>
             <div class="flex flex-wrap gap-1">
               @for (mod of paquete.modulos; track mod.idModulo) {
@@ -109,7 +150,7 @@
         </tr>
       } @empty {
         <tr hlmTr>
-          <td hlmTd colspan="5" class="py-8 text-center text-muted-foreground">
+          <td hlmTd colspan="6" class="py-8 text-center text-muted-foreground">
             {{ paquetesResource.isLoading() ? 'Cargando…' : 'Sin paquetes registrados.' }}
           </td>
         </tr>
@@ -117,3 +158,6 @@
     </tbody>
   </table>
 </div>
+
+<moldhea-pagination [page]="page()" [totalPages]="totalPages()" [totalElements]="totalElements()"
+  [first]="page() === 0" [last]="page() >= totalPages() - 1" (pageChange)="cambiarPagina($event)" />

@@ -3,12 +3,14 @@
   subtitle="Productos, planes y módulos que arman las licencias de Moldhea"
 />
 
-<div hlmTabs tab="productos">
+<div hlmTabs [tab]="activeTab()" (tabActivated)="selectTab($event)">
   <div hlmTabsList>
     <button hlmTabsTrigger="productos">Productos</button>
     <button hlmTabsTrigger="planes">Planes</button>
     <button hlmTabsTrigger="modulos">Módulos</button>
     <button hlmTabsTrigger="paquetes">Paquetes</button>
+    <button hlmTabsTrigger="descuentos">Descuentos</button>
+    <button hlmTabsTrigger="periodos-licencia">Licencias</button>
   </div>
 
   <div hlmTabsContent="productos">
@@ -32,6 +34,18 @@
   <div hlmTabsContent="paquetes">
     <div hlmCard>
       <moldhea-packages-panel />
+    </div>
+  </div>
+
+  <div hlmTabsContent="descuentos">
+    <div hlmCard>
+      <moldhea-descuentos-panel />
+    </div>
+  </div>
+
+  <div hlmTabsContent="periodos-licencia">
+    <div hlmCard>
+      <moldhea-periodos-licencia-panel />
     </div>
   </div>
 </div>

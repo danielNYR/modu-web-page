@@ -1,0 +1,137 @@
+<div class="flex items-center justify-between border-b border-border p-4">
+  <p class="text-sm text-muted-foreground">{{ periodosResource.value().length }} periodos</p>
+  <button hlmBtn size="sm" (click)="showForm() ? cancelarForm() : nuevoPeriodo()">
+    <ng-icon name="lucidePlus" size="16" />
+    Nuevo periodo
+  </button>
+</div>
+
+@if (error()) {
+  <p class="border-b border-border px-4 py-2 text-sm text-destructive">{{ error() }}</p>
+}
+
+@if (showForm()) {
+  <div class="border-b border-border bg-muted/20 p-5 space-y-4">
+    <h3 class="text-sm font-semibold text-foreground">
+      {{ editingId() ? 'Editar periodo' : 'Nuevo periodo' }}
+    </h3>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="p-clave">Clave <span class="text-destructive">*</span></label>
+        <input hlmInput id="p-clave" placeholder="Ej. TRIMESTRAL"
+          [ngModel]="clave()" (ngModelChange)="clave.set($event)" />
+        <span class="text-xs text-muted-foreground">Identificador interno, sin espacios (ej. TRIMESTRAL)</span>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="p-nombre">Nombre <span class="text-destructive">*</span></label>
+        <input hlmInput id="p-nombre" placeholder="Ej. Trimestral"
+          [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="p-duracion">
+          Duración <span class="text-xs font-normal text-muted-foreground">(meses, vacío = sin vencimiento)</span>
+        </label>
+        <input hlmInput id="p-duracion" type="number" min="1" placeholder="Ej. 3"
+          [ngModel]="duracionMeses()" (ngModelChange)="duracionMeses.set($event ? +$event : undefined)"
+          [disabled]="esPrueba()" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="p-renovacion">
+          Renueva cada <span class="text-xs font-normal text-muted-foreground">(meses, opcional — por defecto igual a la duración)</span>
+        </label>
+        <input hlmInput id="p-renovacion" type="number" min="1" placeholder="Ej. 3"
+          [ngModel]="renovacionCadaMeses()" (ngModelChange)="renovacionCadaMeses.set($event ? +$event : undefined)" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="p-descuento">
+          Descuento vs. mensual <span class="text-xs font-normal text-muted-foreground">(%, opcional)</span>
+        </label>
+        <input hlmInput id="p-descuento" type="number" min="0" max="100" step="0.01" placeholder="Ej. 10"
+          [ngModel]="descuentoVsMensualPct()" (ngModelChange)="descuentoVsMensualPct.set($event ? +$event : undefined)" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="p-orden">Orden <span class="text-xs font-normal text-muted-foreground">(en el selector, menor primero)</span></label>
+        <input hlmInput id="p-orden" type="number" min="0" placeholder="0"
+          [ngModel]="orden()" (ngModelChange)="orden.set($event ? +$event : undefined)" />
+      </div>
+
+      <label class="flex cursor-pointer items-start gap-3 self-end rounded-lg border border-border bg-background p-3 transition-colors hover:bg-muted/40">
+        <input type="checkbox" class="mt-0.5 size-4 shrink-0 cursor-pointer rounded accent-primary"
+          [ngModel]="esPrueba()" (ngModelChange)="esPrueba.set($event)" />
+        <div class="space-y-0.5">
+          <p class="text-sm font-medium text-foreground">Es periodo de prueba</p>
+          <p class="text-xs text-muted-foreground">La duración real se toma de los días de trial del plan, no del campo Duración</p>
+        </div>
+      </label>
+    </div>
+
+    <div class="flex items-center gap-2 pt-1">
+      <button hlmBtn size="sm" [disabled]="saving()" (click)="guardar()">
+        {{ saving() ? 'Guardando…' : 'Guardar periodo' }}
+      </button>
+      <button hlmBtn variant="ghost" size="sm" (click)="cancelarForm()">Cancelar</button>
+    </div>
+  </div>
+}
+
+<div hlmTableContainer>
+  <table hlmTable>
+    <thead hlmTHead>
+      <tr hlmTr>
+        <th hlmTh>Clave</th>
+        <th hlmTh>Nombre</th>
+        <th hlmTh>Duración</th>
+        <th hlmTh>Renueva cada</th>
+        <th hlmTh>Descuento</th>
+        <th hlmTh>Estado</th>
+        <th hlmTh></th>
+      </tr>
+    </thead>
+    <tbody hlmTBody>
+      @for (p of periodosResource.value(); track p.idPeriodo) {
+        <tr hlmTr>
+          <td hlmTd class="font-mono text-xs font-medium">{{ p.clave }}</td>
+          <td hlmTd class="font-medium">{{ p.nombre }}</td>
+          <td hlmTd class="text-sm text-muted-foreground">
+            @if (p.esPrueba) {
+              <span>Prueba (según plan)</span>
+            } @else if (p.duracionMeses) {
+              <span>{{ p.duracionMeses }} {{ p.duracionMeses === 1 ? 'mes' : 'meses' }}</span>
+            } @else {
+              <span>Sin vencimiento</span>
+            }
+          </td>
+          <td hlmTd class="text-sm text-muted-foreground">
+            {{ p.renovacionCadaMeses ? (p.renovacionCadaMeses + ' meses') : '—' }}
+          </td>
+          <td hlmTd class="text-sm text-muted-foreground">
+            {{ p.descuentoVsMensualPct ? (p.descuentoVsMensualPct + '%') : '—' }}
+          </td>
+          <td hlmTd>
+            <span hlmBadge [variant]="p.isActive ? 'default' : 'outline'">
+              {{ p.isActive ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td hlmTd class="whitespace-nowrap text-right">
+            <button hlmBtn variant="ghost" size="sm" (click)="editarPeriodo(p.idPeriodo)">Editar</button>
+            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(p.idPeriodo, !p.isActive)">
+              {{ p.isActive ? 'Desactivar' : 'Activar' }}
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr hlmTr>
+          <td hlmTd colspan="7" class="py-8 text-center text-muted-foreground">
+            {{ periodosResource.isLoading() ? 'Cargando…' : 'Sin periodos registrados.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

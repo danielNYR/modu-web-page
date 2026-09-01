@@ -1,4 +1,4 @@
-import type { EstatusSuscripcion, Periodo, TipoDespliegue } from '@app/core/models/enums';
+import type { EstatusSuscripcion, TipoDespliegue } from '@app/core/models/enums';
 
 export interface ModuloHabilitado {
   idModulo: number;
@@ -13,8 +13,8 @@ export interface Licencia {
   idTenant: number;
   idUsuario: number;
   planSlug: string;
-  planNombre: string;
-  periodo: Periodo;
+  planNombre: string | null;
+  periodo: string;
   estatus: EstatusSuscripcion;
   tipoDespliegue: TipoDespliegue;
   fechaInicio: string;
@@ -37,7 +37,7 @@ export interface GenerarLicenciaRequest {
   idTenant: number;
   idPlan: number;
   idProducto: number;
-  periodo: Periodo;
+  periodo: string;
   tipoDespliegue?: TipoDespliegue;
   modulosOverride?: ModuloOverride[];
 }

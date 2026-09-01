@@ -1,6 +1,7 @@
 export interface Plan {
   idPlan: number;
   idProducto: number;
+  idGiros: number[];
   slug: string;
   nombre: string;
   precioMensual: number;
@@ -12,6 +13,7 @@ export interface Plan {
 
 export interface PlanRequest {
   idProducto: number;
+  idGiros?: number[];
   slug: string;
   nombre: string;
   precioMensual: number;
@@ -19,6 +21,7 @@ export interface PlanRequest {
   moneda?: string;
   trialDias?: number;
   isActive?: boolean;
+  modulos?: PlanModuloRequest[];
 }
 
 export interface PlanModulo {

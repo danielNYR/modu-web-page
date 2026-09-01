@@ -101,8 +101,8 @@
             [ngModel]="periodo()"
             (ngModelChange)="periodo.set($event)"
           >
-            @for (p of periodos; track p) {
-              <option [value]="p">{{ p }}</option>
+            @for (p of periodosResource.value(); track p.idPeriodo) {
+              <option [value]="p.clave">{{ p.nombre }}</option>
             }
           </select>
         </div>

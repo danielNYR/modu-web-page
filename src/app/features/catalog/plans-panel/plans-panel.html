@@ -1,4 +1,5 @@
-<div class="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+<!-- ── Top bar ─────────────────────────────────────────────────────────── -->
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
   <select
     class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
     [ngModel]="filterProducto()"
@@ -16,80 +17,300 @@
   </button>
 </div>
 
+<!-- ── Error banner ───────────────────────────────────────────────────── -->
 @if (error()) {
-  <p class="border-b border-border px-4 py-2 text-sm text-destructive">{{ error() }}</p>
+  <div class="border-b border-border bg-destructive/5 px-4 py-2.5 text-sm text-destructive">
+    {{ error() }}
+  </div>
 }
 
+<!-- ── Formulario ─────────────────────────────────────────────────────── -->
 @if (showForm()) {
-  <div class="grid grid-cols-2 gap-3 border-b border-border bg-muted/30 p-4 sm:grid-cols-3">
-    <div class="space-y-1.5">
-      <label hlmLabel for="pl-producto">Producto</label>
-      <select
-        id="pl-producto"
-        class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none"
-        [ngModel]="formProducto()"
-        (ngModelChange)="formProducto.set($event)"
+  <div class="border-b border-border bg-muted/20 p-5 space-y-6">
+    <h3 class="text-sm font-semibold text-foreground">Nuevo plan de precios</h3>
+
+    <!-- Producto & Giro -->
+    <div class="space-y-2.5">
+      <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Producto y segmentación</p>
+      <div class="grid gap-3 sm:grid-cols-2">
+
+        <!-- Producto: solo se muestra el selector si hay más de uno -->
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="pl-producto">
+            Producto <span class="text-destructive">*</span>
+          </label>
+          @if (productosResource.value().length === 1) {
+            <!-- Auto-seleccionado: solo muestra el nombre -->
+            <div class="flex h-9 items-center rounded-md border border-border bg-muted/30 px-3 text-sm text-foreground">
+              {{ productosResource.value()[0].nombre }}
+            </div>
+          } @else {
+            <select
+              id="pl-producto"
+              class="h-9 w-full rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+              [ngModel]="formProducto()"
+              (ngModelChange)="formProducto.set($event)"
+            >
+              <option [ngValue]="undefined">Selecciona un producto…</option>
+              @for (producto of productosResource.value(); track producto.idProducto) {
+                <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
+              }
+            </select>
+          }
+        </div>
+
+        <!-- Giro(s) -->
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel>
+            Giros
+            <span class="ml-1 text-xs font-normal text-muted-foreground">(opcional, puedes marcar varios)</span>
+          </label>
+          @if (girosResource.value().length) {
+            <div class="flex flex-wrap gap-2 rounded-md border border-border bg-background p-2.5">
+              @for (giro of girosResource.value(); track giro.idGiro) {
+                <label
+                  class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors"
+                  [class]="formGiros().has(giro.idGiro) ? 'border-primary bg-primary/10' : 'border-border'"
+                >
+                  <input
+                    type="checkbox"
+                    class="size-3.5 rounded border-input accent-primary"
+                    [checked]="formGiros().has(giro.idGiro)"
+                    (change)="toggleFormGiro(giro.idGiro)"
+                  />
+                  {{ giro.nombreGiro }}
+                </label>
+              }
+            </div>
+          } @else {
+            <p class="text-xs text-muted-foreground">No hay giros en el catálogo.</p>
+          }
+          <p class="text-xs text-muted-foreground">Deja todo sin marcar si el plan no segmenta por giro</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Módulos del plan -->
+    <div class="space-y-2.5">
+      <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Módulos incluidos</p>
+      @if (modulosDelFormulario.isLoading()) {
+        <p class="text-sm text-muted-foreground">Cargando módulos…</p>
+      } @else if (!modulosDelFormulario.value().length) {
+        <p class="text-sm text-muted-foreground">Selecciona un producto para ver sus módulos.</p>
+      } @else {
+        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          @for (modulo of modulosDelFormulario.value(); track modulo.idModulo) {
+            <label
+              class="flex cursor-pointer items-center justify-between gap-2 rounded-md border border-border bg-background p-2.5 text-sm transition-colors hover:bg-muted/40"
+            >
+              <span class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  class="size-4 rounded border-input accent-primary"
+                  [checked]="formModulos().has(modulo.idModulo)"
+                  (change)="toggleFormModulo(modulo.idModulo)"
+                />
+                {{ modulo.nombre }}
+              </span>
+              <span class="text-xs text-muted-foreground">
+                {{ modulo.precioMensualBase | currency: 'MXN' : 'symbol' : '1.0-0' }}
+              </span>
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Precio base y descuento sugerido -->
+    @if (formModulos().size > 0) {
+      <div class="space-y-2.5">
+        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Precio sugerido</p>
+        <div class="rounded-lg border border-border bg-background p-3">
+          <p class="text-sm text-muted-foreground">
+            Precio base ({{ formModulos().size }} módulo{{ formModulos().size === 1 ? '' : 's' }}):
+            <span class="font-semibold text-foreground">{{ precioBase() | currency: 'MXN' }}</span>
+          </p>
+          <div class="mt-2.5 grid grid-cols-3 gap-2">
+            @for (pct of descuentoPcts(); track $index) {
+              <div class="flex flex-col items-center gap-1 rounded-md border border-border p-2">
+                <div class="flex items-center gap-1">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    class="h-6 w-12 rounded border border-input bg-transparent text-center text-xs outline-none"
+                    [ngModel]="pct"
+                    (ngModelChange)="setDescuentoPct($index, +$event)"
+                  />
+                  <span class="text-xs text-muted-foreground">%</span>
+                </div>
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  class="w-full text-xs"
+                  (click)="aplicarDescuento(pct)"
+                >
+                  {{ precioConDescuento(pct) | currency: 'MXN' : 'symbol' : '1.0-0' }}
+                </button>
+              </div>
+            }
+          </div>
+          <p class="mt-2 text-xs text-muted-foreground">
+            @if (todosLosModulosSeleccionados()) {
+              Todos los módulos del producto están seleccionados — descuentos sugeridos más altos.
+            } @else {
+              Selección parcial de módulos.
+            }
+            Los porcentajes son editables y el precio mensual de abajo también se puede ajustar a mano.
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- Nombre e identificador -->
+    <div class="space-y-2.5">
+      <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Identificación</p>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="pl-nombre">
+            Nombre del plan <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            id="pl-nombre"
+            placeholder="Ej. Starter, Pro, Enterprise"
+            [ngModel]="nombre()"
+            (ngModelChange)="nombre.set($event)"
+          />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="pl-slug">
+            Slug <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            id="pl-slug"
+            placeholder="Ej. starter, pro"
+            [ngModel]="slug()"
+            (ngModelChange)="slug.set($event)"
+          />
+          <p class="text-xs text-muted-foreground">Identificador interno único. Solo minúsculas y guiones.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Precios -->
+    <div class="space-y-2.5">
+      <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Precios (MXN)</p>
+      <div class="grid gap-3 sm:grid-cols-2">
+
+        <!-- Precio mensual -->
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="pl-mensual">Precio mensual</label>
+          <input
+            hlmInput
+            id="pl-mensual"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            [ngModel]="precioMensual()"
+            (ngModelChange)="onPrecioMensualChange($event)"
+          />
+        </div>
+
+        <!-- Precio anual con cálculo automático -->
+        <div class="flex flex-col gap-1.5">
+          <div class="flex items-center gap-2">
+            <label hlmLabel for="pl-anual">Precio anual</label>
+            @if (precioAnualEditado()) {
+              <span
+                class="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700"
+              >Personalizado</span>
+            } @else if (precioMensual()) {
+              <span
+                class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+              >-10% automático</span>
+            }
+          </div>
+          <input
+            hlmInput
+            id="pl-anual"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            [ngModel]="precioAnualDisplay()"
+            (ngModelChange)="onPrecioAnualChange($event)"
+          />
+          <p class="text-xs text-muted-foreground">
+            @if (!precioAnualEditado()) {
+              Calculado como mensual × 12 con 10% de descuento. Puedes editarlo.
+            } @else {
+              Valor personalizado. Cambia el precio mensual para recalcular.
+            }
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Periodo de prueba -->
+    <div class="space-y-2.5">
+      <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Periodo de prueba</p>
+      <label
+        class="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-background p-3 transition-colors hover:bg-muted/40"
       >
-        <option [ngValue]="undefined">Selecciona…</option>
-        @for (producto of productosResource.value(); track producto.idProducto) {
-          <option [ngValue]="producto.idProducto">{{ producto.nombre }}</option>
-        }
-      </select>
+        <input
+          type="checkbox"
+          class="mt-0.5 size-4 shrink-0 cursor-pointer rounded accent-primary"
+          [ngModel]="tieneTrialEnabled()"
+          (ngModelChange)="tieneTrialEnabled.set($event)"
+        />
+        <div class="space-y-0.5">
+          <p class="text-sm font-medium text-foreground">Incluye periodo de prueba gratuito</p>
+          <p class="text-xs text-muted-foreground">Los nuevos usuarios podrán acceder sin pagar durante N días</p>
+        </div>
+      </label>
+      @if (tieneTrialEnabled()) {
+        <div class="flex items-center gap-2.5 pl-1">
+          <input
+            hlmInput
+            id="pl-trial"
+            type="number"
+            min="1"
+            placeholder="14"
+            class="w-24"
+            [ngModel]="trialDias()"
+            (ngModelChange)="trialDias.set($event ? +$event : undefined)"
+          />
+          <label hlmLabel for="pl-trial" class="font-normal text-muted-foreground">días de acceso gratuito</label>
+        </div>
+      }
     </div>
-    <div class="space-y-1.5">
-      <label hlmLabel for="pl-slug">Slug</label>
-      <input hlmInput id="pl-slug" [ngModel]="slug()" (ngModelChange)="slug.set($event)" placeholder="pro" />
-    </div>
-    <div class="space-y-1.5">
-      <label hlmLabel for="pl-nombre">Nombre</label>
-      <input hlmInput id="pl-nombre" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" placeholder="Plan Pro" />
-    </div>
-    <div class="space-y-1.5">
-      <label hlmLabel for="pl-mensual">Precio mensual</label>
-      <input
-        hlmInput
-        id="pl-mensual"
-        type="number"
-        [ngModel]="precioMensual()"
-        (ngModelChange)="precioMensual.set($event ? +$event : undefined)"
-      />
-    </div>
-    <div class="space-y-1.5">
-      <label hlmLabel for="pl-anual">Precio anual</label>
-      <input
-        hlmInput
-        id="pl-anual"
-        type="number"
-        [ngModel]="precioAnual()"
-        (ngModelChange)="precioAnual.set($event ? +$event : undefined)"
-      />
-    </div>
-    <div class="space-y-1.5">
-      <label hlmLabel for="pl-trial">Días de trial</label>
-      <input
-        hlmInput
-        id="pl-trial"
-        type="number"
-        placeholder="14"
-        [ngModel]="trialDias()"
-        (ngModelChange)="trialDias.set($event ? +$event : undefined)"
-      />
-    </div>
-    <div class="col-span-full flex gap-2">
-      <button hlmBtn size="sm" [disabled]="saving()" (click)="crear()">{{ saving() ? 'Guardando…' : 'Guardar' }}</button>
-      <button hlmBtn variant="ghost" size="sm" (click)="showForm.set(false)">Cancelar</button>
+
+    <!-- Acciones -->
+    <div class="flex items-center gap-2 pt-1">
+      <button hlmBtn size="sm" [disabled]="saving()" (click)="crear()">
+        {{ saving() ? 'Guardando…' : 'Guardar plan' }}
+      </button>
+      <button hlmBtn variant="ghost" size="sm" (click)="cancelarForm()">Cancelar</button>
     </div>
   </div>
 }
 
+<!-- ── Tabla ───────────────────────────────────────────────────────────── -->
 <div hlmTableContainer>
   <table hlmTable>
     <thead hlmTHead>
       <tr hlmTr>
         <th hlmTh>Plan</th>
-        <th hlmTh>Producto</th>
+        <th hlmTh>Giros</th>
         <th hlmTh>Precio mensual</th>
         <th hlmTh>Precio anual</th>
+        <th hlmTh>Ahorro anual</th>
         <th hlmTh>Trial</th>
         <th hlmTh>Estado</th>
         <th hlmTh></th>
@@ -99,16 +320,31 @@
       @for (plan of planesResource.value(); track plan.idPlan) {
         <tr hlmTr>
           <td hlmTd class="font-medium">{{ plan.nombre }}</td>
-          <td hlmTd>{{ productoNombre(plan.idProducto) }}</td>
+          <td hlmTd class="text-sm text-muted-foreground">{{ giroNombres(plan.idGiros) }}</td>
           <td hlmTd>{{ plan.precioMensual | number: '1.2-2' }} {{ plan.moneda }}</td>
           <td hlmTd>{{ plan.precioAnual | number: '1.2-2' }} {{ plan.moneda }}</td>
-          <td hlmTd>{{ plan.trialDias }} días</td>
           <td hlmTd>
-            <span hlmBadge [variant]="plan.isActive ? 'default' : 'outline'">{{
-              plan.isActive ? 'Activo' : 'Inactivo'
-            }}</span>
+            @if (ahorroDelPlan(plan.idPlan) > 0) {
+              <span hlmBadge variant="secondary">
+                Ahorra {{ ahorroDelPlan(plan.idPlan) | currency: plan.moneda : 'symbol' : '1.0-0' }}
+              </span>
+            } @else {
+              <span class="text-sm text-muted-foreground">—</span>
+            }
           </td>
-          <td hlmTd class="text-right whitespace-nowrap">
+          <td hlmTd>
+            @if (plan.trialDias > 0) {
+              <span class="text-sm">{{ plan.trialDias }} días</span>
+            } @else {
+              <span class="text-sm text-muted-foreground">Sin trial</span>
+            }
+          </td>
+          <td hlmTd>
+            <span hlmBadge [variant]="plan.isActive ? 'default' : 'outline'">
+              {{ plan.isActive ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td hlmTd class="whitespace-nowrap text-right">
             <button hlmBtn variant="ghost" size="sm" (click)="gestionarModulos(plan.idPlan)">Módulos</button>
             <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(plan.idPlan, !plan.isActive)">
               {{ plan.isActive ? 'Desactivar' : 'Activar' }}
@@ -117,7 +353,7 @@
         </tr>
       } @empty {
         <tr hlmTr>
-          <td hlmTd colspan="7" class="py-8 text-center text-muted-foreground">
+          <td hlmTd colspan="8" class="py-8 text-center text-muted-foreground">
             {{ planesResource.isLoading() ? 'Cargando…' : 'Sin planes registrados.' }}
           </td>
         </tr>
@@ -126,6 +362,7 @@
   </table>
 </div>
 
+<!-- ── Gestión de módulos del plan ────────────────────────────────────── -->
 @if (managingPlanId()) {
   <div class="border-t border-border bg-muted/20 p-4">
     <div class="mb-3 flex items-center justify-between">

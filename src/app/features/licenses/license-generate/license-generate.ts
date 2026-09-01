@@ -7,7 +7,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmLabel } from '@spartan-ng/helm/label';
-import { PERIODOS, TIPOS_DESPLIEGUE, type Periodo, type TipoDespliegue } from '@app/core/models/enums';
+import { TIPOS_DESPLIEGUE, type TipoDespliegue } from '@app/core/models/enums';
 import { extractErrorMessage } from '@app/core/http/error-message';
 import { CatalogService } from '@app/features/catalog/data/catalog.service';
 import { LicensesService } from '@app/features/licenses/data/licenses.service';
@@ -25,14 +25,14 @@ export class LicenseGenerate {
   private readonly licensesService = inject(LicensesService);
   private readonly router = inject(Router);
 
-  protected readonly periodos = PERIODOS;
   protected readonly tiposDespliegue = TIPOS_DESPLIEGUE;
+  protected readonly periodosResource = this.catalogService.periodosLicencia();
 
   protected readonly idTenant = signal<number | undefined>(undefined);
   protected readonly idUsuario = signal<number | undefined>(undefined);
   protected readonly idProducto = signal<number | undefined>(undefined);
   protected readonly idPlan = signal<number | undefined>(undefined);
-  protected readonly periodo = signal<Periodo>('MENSUAL');
+  protected readonly periodo = signal<string>('MENSUAL');
   protected readonly tipoDespliegue = signal<TipoDespliegue>('CLOUD');
 
   /** idModulo -> habilitado, solo para módulos que el usuario cambió respecto al default del plan. */

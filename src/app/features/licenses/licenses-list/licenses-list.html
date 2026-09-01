@@ -76,7 +76,7 @@
           <tbody hlmTBody>
             @for (licencia of licensesResource.value().content; track licencia.idLicencia) {
               <tr hlmTr>
-                <td hlmTd class="font-medium">{{ licencia.planNombre }}</td>
+                <td hlmTd class="font-medium">{{ licencia.planNombre?.trim() || 'Personalizado' }}</td>
                 <td hlmTd>
                   <a [routerLink]="['/tenants', licencia.idTenant]" class="text-moldhea-600 hover:underline"
                     >#{{ licencia.idTenant }}</a

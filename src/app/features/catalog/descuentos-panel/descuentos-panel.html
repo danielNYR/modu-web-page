@@ -1,0 +1,160 @@
+<div class="flex items-center justify-between border-b border-border p-4">
+  <p class="text-sm text-muted-foreground">{{ descuentosResource.value().length }} descuentos</p>
+  <button hlmBtn size="sm" (click)="showForm() ? cancelarForm() : nuevoDescuento()">
+    <ng-icon name="lucidePlus" size="16" />
+    Nuevo descuento
+  </button>
+</div>
+
+@if (error()) {
+  <p class="border-b border-border px-4 py-2 text-sm text-destructive">{{ error() }}</p>
+}
+
+@if (showForm()) {
+  <div class="border-b border-border bg-muted/20 p-5 space-y-4">
+    <h3 class="text-sm font-semibold text-foreground">
+      {{ editingId() ? 'Editar descuento' : 'Nuevo descuento' }}
+    </h3>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="d-nombre">Nombre <span class="text-destructive">*</span></label>
+        <input hlmInput id="d-nombre" placeholder="Ej. 10% por volumen"
+          [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="d-tipo">Tipo <span class="text-destructive">*</span></label>
+          <select id="d-tipo"
+            class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+            [ngModel]="tipoValor()" (ngModelChange)="tipoValor.set($event)">
+            <option value="PORCENTAJE">Porcentaje</option>
+            <option value="MONTO_FIJO">Monto fijo</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label hlmLabel for="d-valor">
+            Valor <span class="text-destructive">*</span>
+            <span class="text-xs font-normal text-muted-foreground">{{ tipoValor() === 'PORCENTAJE' ? '(%)' : '(MXN)' }}</span>
+          </label>
+          <input hlmInput id="d-valor" type="number" min="0" step="0.01"
+            [ngModel]="valor()" (ngModelChange)="valor.set($event)" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="d-producto">Producto <span class="text-xs font-normal text-muted-foreground">(opcional)</span></label>
+        <select id="d-producto"
+          class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+          [ngModel]="idProducto()" (ngModelChange)="idProducto.set($event)">
+          <option [ngValue]="undefined">Cualquier producto</option>
+          @for (p of productosResource.value(); track p.idProducto) {
+            <option [ngValue]="p.idProducto">{{ p.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="d-giro">Giro <span class="text-xs font-normal text-muted-foreground">(opcional)</span></label>
+        <select id="d-giro"
+          class="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+          [ngModel]="idGiro()" (ngModelChange)="idGiro.set($event)">
+          <option [ngValue]="undefined">Cualquier giro</option>
+          @for (g of girosResource.value(); track g.idGiro) {
+            <option [ngValue]="g.idGiro">{{ g.nombreGiro }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="d-min-modulos">
+          Mínimo de módulos <span class="text-xs font-normal text-muted-foreground">(opcional)</span>
+        </label>
+        <input hlmInput id="d-min-modulos" type="number" min="1" placeholder="Ej. 5"
+          [ngModel]="minModulos()" (ngModelChange)="minModulos.set($event)" />
+      </div>
+
+      <label class="flex cursor-pointer items-center gap-2.5 self-end rounded-lg border border-border bg-background px-3 py-2">
+        <input type="checkbox" class="size-4 rounded border-input accent-primary"
+          [ngModel]="soloPrimeraCompra()" (ngModelChange)="soloPrimeraCompra.set($event)" />
+        <span class="text-sm text-foreground">Solo primera compra</span>
+      </label>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="d-inicio">Vigente desde <span class="text-xs font-normal text-muted-foreground">(opcional)</span></label>
+        <input hlmInput id="d-inicio" type="datetime-local"
+          [ngModel]="fechaInicio()" (ngModelChange)="fechaInicio.set($event)" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="d-fin">Vigente hasta <span class="text-xs font-normal text-muted-foreground">(opcional)</span></label>
+        <input hlmInput id="d-fin" type="datetime-local"
+          [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" />
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 pt-1">
+      <button hlmBtn size="sm" [disabled]="saving()" (click)="guardar()">
+        {{ saving() ? 'Guardando…' : 'Guardar descuento' }}
+      </button>
+      <button hlmBtn variant="ghost" size="sm" (click)="cancelarForm()">Cancelar</button>
+    </div>
+  </div>
+}
+
+<div hlmTableContainer>
+  <table hlmTable>
+    <thead hlmTHead>
+      <tr hlmTr>
+        <th hlmTh>Nombre</th>
+        <th hlmTh>Valor</th>
+        <th hlmTh>Producto</th>
+        <th hlmTh>Giro</th>
+        <th hlmTh>Condiciones</th>
+        <th hlmTh>Estado</th>
+        <th hlmTh></th>
+      </tr>
+    </thead>
+    <tbody hlmTBody>
+      @for (d of descuentosResource.value(); track d.idDescuento) {
+        <tr hlmTr>
+          <td hlmTd class="font-medium">{{ d.nombre }}</td>
+          <td hlmTd>
+            {{ d.tipoValor === 'PORCENTAJE' ? (d.valor + '%') : (d.valor | currency: d.moneda) }}
+          </td>
+          <td hlmTd class="text-sm text-muted-foreground">{{ productoNombre(d.idProducto) }}</td>
+          <td hlmTd class="text-sm text-muted-foreground">{{ giroNombre(d.idGiro) }}</td>
+          <td hlmTd class="text-xs text-muted-foreground">
+            @if (d.soloPrimeraCompra) {
+              <span class="mr-1.5">Primera compra</span>
+            }
+            @if (d.minModulos) {
+              <span>Mín. {{ d.minModulos }} módulos</span>
+            }
+            @if (!d.soloPrimeraCompra && !d.minModulos) {
+              <span>—</span>
+            }
+          </td>
+          <td hlmTd>
+            <span hlmBadge [variant]="d.isActive ? 'default' : 'outline'">
+              {{ d.isActive ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td hlmTd class="whitespace-nowrap text-right">
+            <button hlmBtn variant="ghost" size="sm" (click)="editarDescuento(d.idDescuento)">Editar</button>
+            <button hlmBtn variant="ghost" size="sm" (click)="cambiarEstado(d.idDescuento, !d.isActive)">
+              {{ d.isActive ? 'Desactivar' : 'Activar' }}
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr hlmTr>
+          <td hlmTd colspan="7" class="py-8 text-center text-muted-foreground">
+            {{ descuentosResource.isLoading() ? 'Cargando…' : 'Sin descuentos registrados.' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
